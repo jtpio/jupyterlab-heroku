@@ -2,11 +2,13 @@ import { ToolbarButton, Toolbar } from "@jupyterlab/apputils";
 
 import { Widget, PanelLayout } from "@phosphor/widgets";
 
+import { Heroku } from "./heroku";
+
 const HEROKU_WIDGET_CLASS = "jp-Heroku";
 const HEROKU_PUSH_CLASS = "jp-FileUploadIcon";
 
 export class HerokuWidget extends Widget {
-  constructor() {
+  constructor(heroku: Heroku) {
     super();
     this.addClass(HEROKU_WIDGET_CLASS);
 
@@ -14,8 +16,10 @@ export class HerokuWidget extends Widget {
 
     let deployButton = new ToolbarButton({
       iconClassName: HEROKU_PUSH_CLASS,
-      onClick: () => {
-        console.log("DEPLOY");
+      onClick: async () => {
+        console.log("get logs");
+        const logs = await heroku.logs();
+        console.log(logs);
       },
       tooltip: "Deploy To Heroku"
     });

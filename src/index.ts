@@ -8,6 +8,7 @@ import { addCommands } from "./commands";
 import { HerokuWidget } from "./widget";
 
 import "../style/index.css";
+import { Heroku } from "./heroku";
 
 const EXTENSION_ID = "jupyterlab-heroku";
 
@@ -20,7 +21,8 @@ const extension: JupyterFrontEndPlugin<void> = {
   activate: (app: JupyterFrontEnd) => {
     addCommands(app);
 
-    let widget = new HerokuWidget();
+    let heroku = new Heroku();
+    let widget = new HerokuWidget(heroku);
     widget.id = "jp-heroku";
     widget.title.iconClass = "jp-SideBar-tabIcon jp-HerokuIcon";
     widget.title.caption = "Heroku";
