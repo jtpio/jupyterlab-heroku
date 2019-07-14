@@ -1,0 +1,7 @@
+[data-jp-theme-light="true"] {
+  --jp-icon-heroku: url("./icons/heroku-light.svg");
+}
+
+[data-jp-theme-light="false"] {
+  --jp-icon-heroku: url("./icons/heroku-dark.svg");
+}
