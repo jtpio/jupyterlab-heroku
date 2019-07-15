@@ -81,7 +81,13 @@ class HerokuAppsComponent extends React.Component<
     this.state = {
       apps: []
     };
+    this.props.heroku.pathChanged.connect(this.refreshApps, this);
+    this.refreshApps();
   }
+
+  componentWillUnmount = () => {
+    this.props.heroku.pathChanged.disconnect(this.refreshApps, this);
+  };
 
   refreshApps = async () => {
     this.setState({ apps: [] });

@@ -1,9 +1,10 @@
 import { ServerConnection } from "@jupyterlab/services";
 
-import { URLExt } from "@jupyterlab/coreutils";
+import { URLExt, IChangedArgs } from "@jupyterlab/coreutils";
 
-import { IFileBrowserFactory } from "@jupyterlab/filebrowser";
+import { IFileBrowserFactory, FileBrowserModel } from "@jupyterlab/filebrowser";
 import { ReadonlyJSONObject } from "@phosphor/coreutils";
+import { ISignal } from "@phosphor/signaling";
 
 const LOGS_ENDPOINT = "/heroku/logs";
 const APPS_ENDPOINT = "/heroku/apps";
@@ -67,6 +68,10 @@ export class Heroku {
       APPS_ENDPOINT
     );
     return response.apps;
+  }
+
+  get pathChanged(): ISignal<FileBrowserModel, IChangedArgs<string>> {
+    return this._fileBrowserFactory.defaultBrowser.model.pathChanged;
   }
 
   readonly _fileBrowserFactory: IFileBrowserFactory;
