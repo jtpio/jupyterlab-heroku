@@ -3,8 +3,10 @@ import { ServerConnection } from "@jupyterlab/services";
 import { URLExt } from "@jupyterlab/coreutils";
 
 import { IFileBrowserFactory } from "@jupyterlab/filebrowser";
+import { ReadonlyJSONObject } from "@phosphor/coreutils";
 
 const LOGS_ENDPOINT = "/heroku/logs";
+const APPS_ENDPOINT = "/heroku/apps";
 
 function httpRequest(
   url: string,
@@ -21,6 +23,19 @@ function httpRequest(
   return ServerConnection.makeRequest(fullUrl, fullRequest, setting);
 }
 
+export interface IHerokuApp {
+  name: string;
+  web_url: string;
+  status?: string;
+}
+
+export type IHerokuApps = IHerokuApp[];
+
+interface IHerokuAppsResponse {
+  code: number;
+  apps: IHerokuApps;
+}
+
 export class Heroku {
   constructor(fileBrowserFactory: IFileBrowserFactory) {
     this._fileBrowserFactory = fileBrowserFactory;
@@ -30,15 +45,28 @@ export class Heroku {
     return this._fileBrowserFactory.defaultBrowser.model.path;
   }
 
-  async logs(): Promise<void> {
+  private async herokuAction<ReturnType>(
+    endpoint: string
+  ): Promise<ReturnType> {
     const path = this.getCurrentPath();
-    const request = httpRequest(LOGS_ENDPOINT, "POST", { current_path: path });
+    const request = httpRequest(endpoint, "POST", { current_path: path });
     const response = await request;
     if (!response.ok) {
       const data = await response.json();
       throw new ServerConnection.ResponseError(response, data.message);
     }
     return response.json();
+  }
+
+  async logs(): Promise<ReadonlyJSONObject> {
+    return this.herokuAction(LOGS_ENDPOINT);
+  }
+
+  async apps(): Promise<IHerokuApps> {
+    const response = await this.herokuAction<IHerokuAppsResponse>(
+      APPS_ENDPOINT
+    );
+    return response.apps;
   }
 
   readonly _fileBrowserFactory: IFileBrowserFactory;

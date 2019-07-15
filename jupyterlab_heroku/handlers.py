@@ -19,6 +19,12 @@ class HerokuHandler(APIHandler):
         return self.get_json_body()["current_path"]
 
 
+class HerokuApps(HerokuHandler):
+    def post(self):
+        result = self.heroku.apps(self.current_path)
+        self.finish(json.dumps(result))
+
+
 class HerokuLogs(HerokuHandler):
     def post(self):
         result = self.heroku.logs(self.current_path)
@@ -32,6 +38,7 @@ def setup_handlers(web_app):
 
     heroku_handlers = [
         ("/heroku/logs", HerokuLogs),
+        ("/heroku/apps", HerokuApps),
     ]
 
     base_url = web_app.settings["base_url"]
