@@ -74,7 +74,11 @@ class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
           {this.state.deploying ? (
             <i className="fa fa-refresh fa-spin fa-lg fa-fw"></i>
           ) : (
-            <i className="fa fa-check-square fa-lg fa-fw"></i>
+            <i
+              className={`fa ${
+                this.state.error ? "fa-exclamation-circle" : "fa-check-square"
+              } fa-lg fa-fw`}
+            ></i>
           )}
         </span>
         <span
@@ -141,7 +145,7 @@ class HerokuAppsComponent extends React.Component<
   deploy = async () => {
     const response = await this.props.heroku.deploy();
     if (response.message) {
-      console.log(response.message);
+      console.error(response.message);
       return false;
     }
     return true;

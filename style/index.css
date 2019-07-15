@@ -57,11 +57,11 @@
 }
 
 .jp-HerokuApp-itemSuccess {
-  color: green;
+  color: var(--jp-success-color2);
 }
 
 .jp-HerokuApp-itemError {
-  color: red;
+  color: var(--jp-error-color2);
 }
 
 .jp-HerokuApp-itemLabel {
