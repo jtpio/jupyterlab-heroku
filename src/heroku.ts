@@ -1,5 +1,8 @@
 import { ServerConnection } from "@jupyterlab/services";
+
 import { URLExt } from "@jupyterlab/coreutils";
+
+import { IFileBrowserFactory } from "@jupyterlab/filebrowser";
 
 const LOGS_ENDPOINT = "/heroku/logs";
 
@@ -19,10 +22,17 @@ function httpRequest(
 }
 
 export class Heroku {
-  constructor() {}
+  constructor(fileBrowserFactory: IFileBrowserFactory) {
+    this._fileBrowserFactory = fileBrowserFactory;
+  }
+
+  private getCurrentPath() {
+    return this._fileBrowserFactory.defaultBrowser.model.path;
+  }
 
   async logs(): Promise<void> {
-    const request = httpRequest(LOGS_ENDPOINT, "POST");
+    const path = this.getCurrentPath();
+    const request = httpRequest(LOGS_ENDPOINT, "POST", { current_path: path });
     const response = await request;
     if (!response.ok) {
       const data = await response.json();
@@ -30,4 +40,6 @@ export class Heroku {
     }
     return response.json();
   }
+
+  readonly _fileBrowserFactory: IFileBrowserFactory;
 }

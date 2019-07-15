@@ -14,10 +14,14 @@ class HerokuHandler(APIHandler):
     def heroku(self):
         return self.settings["heroku"]
 
+    @property
+    def current_path(self):
+        return self.get_json_body()["current_path"]
+
 
 class HerokuLogs(HerokuHandler):
     def post(self):
-        result = self.heroku.logs()
+        result = self.heroku.logs(self.current_path)
         self.finish(json.dumps(result))
 
 

@@ -3,12 +3,13 @@ import {
   JupyterFrontEndPlugin
 } from "@jupyterlab/application";
 
-import { addCommands } from "./commands";
+import { IFileBrowserFactory } from "@jupyterlab/filebrowser";
 
+import { addCommands } from "./commands";
 import { HerokuWidget } from "./widget";
+import { Heroku } from "./heroku";
 
 import "../style/index.css";
-import { Heroku } from "./heroku";
 
 const EXTENSION_ID = "jupyterlab-heroku";
 
@@ -18,10 +19,10 @@ const EXTENSION_ID = "jupyterlab-heroku";
 const extension: JupyterFrontEndPlugin<void> = {
   id: EXTENSION_ID,
   autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
+  requires: [IFileBrowserFactory],
+  activate: (app: JupyterFrontEnd, fileBrowserFactory: IFileBrowserFactory) => {
     addCommands(app);
-
-    let heroku = new Heroku();
+    let heroku = new Heroku(fileBrowserFactory);
     let widget = new HerokuWidget(heroku);
     widget.id = "jp-heroku";
     widget.title.iconClass = "jp-SideBar-tabIcon jp-HerokuIcon";
