@@ -43,6 +43,8 @@ This extension also requires:
 ## Install
 
 ```bash
+pip install jupyterlab-heroku
+jupyter serverextension enable --sys-prefix --py jupyterlab_heroku
 jupyter labextension install jupyterlab-heroku
 ```
 
@@ -50,7 +52,7 @@ Since Heroku uses the `git` to deploy applications, it is recomment to also inst
 
 ```bash
 pip install jupyterlab-git
-jupyter serverextension enable --py jupyterlab_git
+jupyter serverextension enable --sys-prefix --py jupyterlab_git
 jupyter labextension install @jupyterlab/git
 ```
 
