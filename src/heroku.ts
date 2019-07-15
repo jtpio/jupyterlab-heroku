@@ -8,6 +8,7 @@ import { ISignal } from "@phosphor/signaling";
 
 const LOGS_ENDPOINT = "/heroku/logs";
 const APPS_ENDPOINT = "/heroku/apps";
+const DEPLOY_ENDPOINT = "/heroku/deploy";
 
 function httpRequest(
   url: string,
@@ -35,6 +36,11 @@ export type IHerokuApps = IHerokuApp[];
 interface IHerokuAppsResponse {
   code: number;
   apps: IHerokuApps;
+}
+
+interface IHerokuDeployResponse {
+  code: number;
+  message?: string;
 }
 
 export class Heroku {
@@ -68,6 +74,13 @@ export class Heroku {
       APPS_ENDPOINT
     );
     return response.apps;
+  }
+
+  async deploy(): Promise<IHerokuDeployResponse> {
+    const response = await this.herokuAction<IHerokuDeployResponse>(
+      DEPLOY_ENDPOINT
+    );
+    return response;
   }
 
   get pathChanged(): ISignal<FileBrowserModel, IChangedArgs<string>> {

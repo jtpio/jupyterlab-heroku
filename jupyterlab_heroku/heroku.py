@@ -60,3 +60,21 @@ class Heroku:
         remotes = set(all_remotes)
         apps = [app for app in all_apps if app["git_url"] in remotes]
         return {"code": code, "apps": apps}
+
+    def deploy(self, current_path):
+        all_remotes = self._get_remotes(current_path)
+        if not all_remotes:
+            return self._error(500, "No Heroku remote in the current directory")
+
+        p = Popen(
+            ["git", "push", "heroku", "master"],
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd=os.path.join(self.root_dir, current_path),
+        )
+        out, err = p.communicate()
+        code = p.returncode
+        if code != 0:
+            return self._error(p.returncode, err.decode("utf-8"))
+
+        return {"code": code}

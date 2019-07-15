@@ -22,31 +22,47 @@ const HEROKU_APP_OPEN_ICON_CLASS = "jp-RefreshIcon";
 
 const HEROKU_WIDGET_CLASS = "jp-Heroku";
 
+interface IHerokuAppsProps {
+  heroku: Heroku;
+}
+
 interface IHerokuAppListProps {
+  deploy: Function;
   apps: IHerokuApps;
 }
 
-function Item(props: IHerokuApp) {
+interface IHerokuAppProps {
+  deploy: Function;
+  app: IHerokuApp;
+}
+
+interface IHerokuAppsState {
+  apps: IHerokuApps;
+}
+
+function Item(props: IHerokuAppProps) {
   return (
     <li className={HEROKU_APP_ITEM_CLASS}>
       <span
         className={`${HEROKU_APP_ITEM_ICON_CLASS} ${HEROKU_APP_ITEM_STATUS_CLASS}`}
       />
-      <span className={HEROKU_APP_ITEM_LABEL_CLASS} title={props.name}>
-        {props.name}
+      <span className={HEROKU_APP_ITEM_LABEL_CLASS} title={props.app.name}>
+        {props.app.name}
       </span>
       <ToolbarButtonComponent
         tooltip="Open App"
         iconClassName="jp-LauncherIcon"
         onClick={() => {
-          window.open(props.web_url);
+          window.open(props.app.web_url);
         }}
       />
       <ToolbarButtonComponent
         tooltip="Deploy App"
         iconClassName={HEROKU_APP_DEPLOY_ICON_CLASS}
-        onClick={() => {
+        onClick={async () => {
           console.log("DEPLOY");
+          const success = await props.deploy();
+          console.log("Deploy", success);
         }}
       />
     </li>
@@ -54,22 +70,14 @@ function Item(props: IHerokuApp) {
 }
 
 function ListView(props: IHerokuAppListProps) {
-  const { apps } = props;
+  const { apps, deploy } = props;
   return (
     <ul className={HEROKU_APP_LIST_CLASS}>
       {apps.map((props, i) => (
-        <Item key={i} {...props} />
+        <Item key={i} deploy={deploy} app={props} />
       ))}
     </ul>
   );
-}
-
-interface IHerokuAppsProps {
-  heroku: Heroku;
-}
-
-interface IHerokuAppsState {
-  apps: IHerokuApps;
 }
 
 class HerokuAppsComponent extends React.Component<
@@ -82,8 +90,11 @@ class HerokuAppsComponent extends React.Component<
       apps: []
     };
     this.props.heroku.pathChanged.connect(this.refreshApps, this);
-    this.refreshApps();
   }
+
+  componentDidMount = () => {
+    this.refreshApps();
+  };
 
   componentWillUnmount = () => {
     this.props.heroku.pathChanged.disconnect(this.refreshApps, this);
@@ -93,6 +104,15 @@ class HerokuAppsComponent extends React.Component<
     this.setState({ apps: [] });
     const apps = await this.props.heroku.apps();
     this.setState({ apps });
+  };
+
+  deploy = async () => {
+    const response = await this.props.heroku.deploy();
+    if (response.message) {
+      console.log(response.message);
+      return false;
+    }
+    return true;
   };
 
   render() {
@@ -109,7 +129,7 @@ class HerokuAppsComponent extends React.Component<
             onClick={this.refreshApps}
           />
         </div>
-        <ListView apps={...this.state.apps} />
+        <ListView deploy={this.deploy} apps={...this.state.apps} />
       </>
     );
   }

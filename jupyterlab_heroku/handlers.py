@@ -25,6 +25,12 @@ class HerokuApps(HerokuHandler):
         self.finish(json.dumps(result))
 
 
+class HerokuDeploy(HerokuHandler):
+    def post(self):
+        result = self.heroku.deploy(self.current_path)
+        self.finish(json.dumps(result))
+
+
 class HerokuLogs(HerokuHandler):
     def post(self):
         result = self.heroku.logs(self.current_path)
@@ -39,8 +45,11 @@ def setup_handlers(web_app):
     heroku_handlers = [
         ("/heroku/logs", HerokuLogs),
         ("/heroku/apps", HerokuApps),
+        ("/heroku/deploy", HerokuDeploy),
     ]
 
     base_url = web_app.settings["base_url"]
-    heroku_handlers = [(ujoin(base_url, path), handler) for path, handler in heroku_handlers]
+    heroku_handlers = [
+        (ujoin(base_url, path), handler) for path, handler in heroku_handlers
+    ]
     web_app.add_handlers(".*", heroku_handlers)
