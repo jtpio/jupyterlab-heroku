@@ -42,6 +42,7 @@
   color: var(--jp-ui-font-color1);
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
+  margin-top: 10px;
 }
 
 .jp-HerokuApp-itemIcon {
@@ -55,8 +56,12 @@
   background-position: center;
 }
 
-.jp-HerokuApp-itemStatus {
-  background-color: greenyellow;
+.jp-HerokuApp-itemSuccess {
+  color: green;
+}
+
+.jp-HerokuApp-itemError {
+  color: red;
 }
 
 .jp-HerokuApp-itemLabel {

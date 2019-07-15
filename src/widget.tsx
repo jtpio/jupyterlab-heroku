@@ -15,7 +15,8 @@ const HEROKU_HEADER_CLASS = "jp-HerokuApp-header";
 const HEROKU_APP_LIST_CLASS = "jp-HerokuApp-sectionList";
 const HEROKU_APP_ITEM_CLASS = "jp-HerokuApp-item";
 const HEROKU_APP_ITEM_ICON_CLASS = "jp-HerokuApp-itemIcon";
-const HEROKU_APP_ITEM_STATUS_CLASS = "jp-HerokuApp-itemStatus";
+const HEROKU_APP_ITEM_SUCCESS_CLASS = "jp-HerokuApp-itemSuccess";
+const HEROKU_APP_ITEM_ERROR_CLASS = "jp-HerokuApp-itemError";
 const HEROKU_APP_ITEM_LABEL_CLASS = "jp-HerokuApp-itemLabel";
 const HEROKU_APP_DEPLOY_ICON_CLASS = "jp-FileUploadIcon";
 const HEROKU_APP_OPEN_ICON_CLASS = "jp-RefreshIcon";
@@ -36,37 +37,68 @@ interface IHerokuAppProps {
   app: IHerokuApp;
 }
 
+interface IHerokuAppState {
+  deploying: boolean;
+  error: boolean;
+}
+
 interface IHerokuAppsState {
   apps: IHerokuApps;
 }
 
-function Item(props: IHerokuAppProps) {
-  return (
-    <li className={HEROKU_APP_ITEM_CLASS}>
-      <span
-        className={`${HEROKU_APP_ITEM_ICON_CLASS} ${HEROKU_APP_ITEM_STATUS_CLASS}`}
-      />
-      <span className={HEROKU_APP_ITEM_LABEL_CLASS} title={props.app.name}>
-        {props.app.name}
-      </span>
-      <ToolbarButtonComponent
-        tooltip="Open App"
-        iconClassName="jp-LauncherIcon"
-        onClick={() => {
-          window.open(props.app.web_url);
-        }}
-      />
-      <ToolbarButtonComponent
-        tooltip="Deploy App"
-        iconClassName={HEROKU_APP_DEPLOY_ICON_CLASS}
-        onClick={async () => {
-          console.log("DEPLOY");
-          const success = await props.deploy();
-          console.log("Deploy", success);
-        }}
-      />
-    </li>
-  );
+class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
+  constructor(props: IHerokuAppProps) {
+    super(props);
+    this.state = {
+      deploying: false,
+      error: false
+    };
+  }
+
+  deploy = async () => {
+    this.setState({ deploying: true });
+    const success = await this.props.deploy();
+    this.setState({ deploying: false, error: !success });
+  };
+
+  render() {
+    return (
+      <li className={HEROKU_APP_ITEM_CLASS}>
+        <span
+          className={`${HEROKU_APP_ITEM_ICON_CLASS} ${
+            this.state.error
+              ? HEROKU_APP_ITEM_ERROR_CLASS
+              : HEROKU_APP_ITEM_SUCCESS_CLASS
+          }`}
+        >
+          {this.state.deploying ? (
+            <i className="fa fa-refresh fa-spin fa-lg fa-fw"></i>
+          ) : (
+            <i className="fa fa-check-square fa-lg fa-fw"></i>
+          )}
+        </span>
+        <span
+          className={HEROKU_APP_ITEM_LABEL_CLASS}
+          title={this.props.app.name}
+        >
+          {this.props.app.name}
+        </span>
+        <ToolbarButtonComponent
+          tooltip="Open App"
+          iconClassName="jp-LauncherIcon"
+          onClick={() => {
+            window.open(this.props.app.web_url);
+          }}
+        />
+        <ToolbarButtonComponent
+          tooltip="Deploy App"
+          iconClassName={HEROKU_APP_DEPLOY_ICON_CLASS}
+          enabled={!this.state.deploying}
+          onClick={this.deploy}
+        />
+      </li>
+    );
+  }
 }
 
 function ListView(props: IHerokuAppListProps) {
