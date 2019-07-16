@@ -1,8 +1,8 @@
 # jupyterlab-heroku
 
-JupyterLab extension to manage and deploy applications on Heroku.
+JupyterLab extension to manage and deploy applications to Heroku.
 
-The extension can be used to perform 1-click deployments of [voila](https://github.com/QuantStack/voila) dashboards.
+The extension enables 1-click deployments of [voila](https://github.com/QuantStack/voila) dashboards.
 
 ## Requirements
 

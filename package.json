@@ -1,7 +1,7 @@
 {
   "name": "jupyterlab-heroku",
   "version": "0.1.0",
-  "description": "JupyterLab extension to deploy voila dashboards to Heroku",
+  "description": "JupyterLab extension to manage and deploy applications to Heroku",
   "keywords": [
     "jupyter",
     "jupyterlab",
