@@ -14,8 +14,9 @@ class Heroku:
 
     async def _get_remotes(self, current_path):
         # TODO: handle multiple remotes / apps
+        cmd = ["git", "remote", "get-url", "heroku"]
         p = await asyncio.create_subprocess_exec(
-            "git", "remote", "get-url", "heroku",
+            *cmd,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),
@@ -27,8 +28,9 @@ class Heroku:
         return out.decode("utf-8").splitlines()
 
     async def logs(self, current_path):
+        cmd = ["heroku", "logs"]
         p = await asyncio.create_subprocess_exec(
-            "heroku", "logs",
+            *cmd,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),
@@ -46,8 +48,9 @@ class Heroku:
         if not all_remotes:
             return {"code": 0, "apps": []}
 
+        cmd = ["heroku", "apps", "--json"]
         p = await asyncio.create_subprocess_exec(
-            "heroku", "apps", "--json",
+            *cmd,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),
@@ -67,8 +70,9 @@ class Heroku:
         if not all_remotes:
             return self._error(500, "No Heroku remote in the current directory")
 
+        cmd = ["git", "push", "heroku", "master"]
         p = await asyncio.create_subprocess_exec(
-            "git", "push", "heroku", "master",
+            *cmd,
             stdout=PIPE,
             stderr=PIPE,
             cwd=os.path.join(self.root_dir, current_path),
