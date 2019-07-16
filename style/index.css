@@ -36,7 +36,8 @@
   padding: 0px 16px;
 }
 
-.jp-HerokuApp-item {
+.jp-HerokuApp-item,
+.jp-HerokuSettings-item {
   display: flex;
   flex-direction: row;
   color: var(--jp-ui-font-color1);
@@ -64,9 +65,9 @@
   color: var(--jp-error-color2);
 }
 
-.jp-HerokuApp-itemLabel {
+.jp-HerokuApp-itemLabel,
+.jp-HerokuSettings-itemLabel {
   font-size: var(--jp-ui-font-size1);
-  flex: 1 1 auto;
   margin-right: 4px;
   padding-left: 4px;
   text-overflow: ellipsis;
@@ -76,8 +77,33 @@
   transition: background-color 0.1s ease;
 }
 
+.jp-HerokuApp-itemLabel {
+  flex: 1 1 auto;
+}
+
+.jp-HerokuSettings-itemLabel {
+  flex: 0 0 auto;
+  padding: 0px 8px;
+  margin-right: 4px;
+  margin-left: 12px;
+  vertical-align: baseline;
+  flex: 0 0 auto;
+}
+
 .jp-HerokuApp-sectionList {
   margin: 0;
   padding: 0;
   list-style-type: none;
+}
+
+.jp-HerokuSettings-dropdown select {
+  height: 24px;
+  font-size: var(--jp-ui-font-size1);
+  line-height: 14px;
+  border-radius: 0;
+  display: block;
+}
+
+.jp-HerokuSettings-dropdown span {
+  top: 5px !important;
 }
