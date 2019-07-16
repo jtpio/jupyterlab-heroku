@@ -1,5 +1,8 @@
 # jupyterlab-heroku
 
+[![npm](https://img.shields.io/npm/v/jupyterlab-heroku.svg?style=flat-square)](https://www.npmjs.com/package/jupyterlab-heroku)
+[![pypi](https://img.shields.io/pypi/v/jupyterlab-heroku.svg?style=flat-square)](https://pypi.python.org/pypi/jupyterlab-heroku)
+
 JupyterLab extension to manage and deploy applications to Heroku.
 
 The extension enables 1-click deployments of [voila](https://github.com/QuantStack/voila) dashboards.
