@@ -72,13 +72,27 @@ class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
           }`}
         >
           {this.state.deploying ? (
-            <i className="fa fa-refresh fa-spin fa-lg fa-fw"></i>
-          ) : (
             <i
-              className={`fa ${
-                this.state.error ? "fa-exclamation-circle" : "fa-check-square"
-              } fa-lg fa-fw`}
+              title="Deploying"
+              className="fa fa-refresh fa-spin fa-lg fa-fw"
             ></i>
+          ) : (
+            [
+              this.state.error && (
+                <i
+                  key="error"
+                  title="Error"
+                  className="fa fa-exclamation-circle fa-lg fa-fw"
+                ></i>
+              ),
+              !this.state.error && (
+                <i
+                  key="success"
+                  title="Deployed"
+                  className="fa fa-check-square fa-lg fa-fw"
+                ></i>
+              )
+            ]
           )}
         </span>
         <span
