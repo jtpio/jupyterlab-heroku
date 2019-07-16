@@ -1,6 +1,8 @@
 # jupyterlab-heroku
 
-JupyterLab extension to deploy voila dashboards to Heroku
+JupyterLab extension to manage and deploy applications on Heroku.
+
+The extension can be used to perform 1-click deployments of [voila](https://github.com/QuantStack/voila) dashboards.
 
 ## Requirements
 
@@ -48,7 +50,7 @@ jupyter serverextension enable --sys-prefix --py jupyterlab_heroku
 jupyter labextension install jupyterlab-heroku
 ```
 
-Since Heroku uses the `git` to deploy applications, it is recomment to also install the `jupyterlab-git` extension for JupyterLab:
+Since Heroku uses `git` to deploy applications, it is also recommended to install the `jupyterlab-git` extension for JupyterLab:
 
 ```bash
 pip install jupyterlab-git
