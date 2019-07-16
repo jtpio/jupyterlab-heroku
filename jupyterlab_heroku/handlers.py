@@ -20,20 +20,20 @@ class HerokuHandler(APIHandler):
 
 
 class HerokuApps(HerokuHandler):
-    def post(self):
-        result = self.heroku.apps(self.current_path)
+    async def post(self):
+        result = await self.heroku.apps(self.current_path)
         self.finish(json.dumps(result))
 
 
 class HerokuDeploy(HerokuHandler):
-    def post(self):
-        result = self.heroku.deploy(self.current_path)
+    async def post(self):
+        result = await self.heroku.deploy(self.current_path)
         self.finish(json.dumps(result))
 
 
 class HerokuLogs(HerokuHandler):
-    def post(self):
-        result = self.heroku.logs(self.current_path)
+    async def post(self):
+        result = await self.heroku.logs(self.current_path)
         self.finish(json.dumps(result))
 
 
