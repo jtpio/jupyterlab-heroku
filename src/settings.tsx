@@ -66,7 +66,7 @@ class HerokuSettingsRuntimeComponent extends React.Component<
     return (
       <>
         <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Runtime">
-          <h3>Runtime</h3>
+          <h4>Runtime</h4>
         </div>
         <HTMLSelect
           className={HEROKU_SETTINGS_SELECT_CLASS}
@@ -120,7 +120,7 @@ class HerokuSettingsDependenciesComponent extends React.Component<
     return (
       <>
         <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Dependencies">
-          <h3>Dependencies</h3>
+          <h4>Dependencies</h4>
         </div>
         <TextArea
           className={`${HEROKU_SETTINGS_TEXTAREA_CLASS}`}

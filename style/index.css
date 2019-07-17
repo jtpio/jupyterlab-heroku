@@ -92,10 +92,10 @@
 }
 
 /* Heroku Settings - Label */
-.jp-HerokuSettings-title h3 {
-  padding: 8px 8px 8px 12px;
+.jp-HerokuSettings-title h4 {
+  padding: 8px 8px 4px 16px;
   margin: 0;
-  font-weight: 400;
+  font-weight: 200;
 }
 
 /* Heroku Settings - List of settings */
@@ -110,7 +110,7 @@
 
 /* Heroku Settings - Dropdown */
 .jp-HerokuSettings-dropdown.bp3-html-select.jp-HTMLSelect {
-  margin: 10px;
+  margin: 5px 16px;
   height: 24;
   font-size: var(--jp-ui-font-size1);
   line-height: 14px;
@@ -129,7 +129,7 @@
 /* Heroku Settings - TextArea */
 .jp-HerokuSettings-textarea.bp3-input {
   height: 150px;
-  margin: 10px;
+  margin: 5px 16px;
   font-size: var(--jp-ui-font-size1);
   border-radius: 0;
   color: var(--jp-ui-font-color0);
