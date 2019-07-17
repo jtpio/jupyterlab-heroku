@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { Heroku, IHerokuApp, IHerokuApps } from "./heroku";
 
-const HEROKU_HEADER_CLASS = "jp-HerokuApp-header";
+const HEROKU_HEADER_CLASS = "jp-Heroku-header";
 const HEROKU_APP_LIST_CLASS = "jp-HerokuApp-sectionList";
 const HEROKU_APP_ITEM_CLASS = "jp-HerokuApp-item";
 const HEROKU_APP_ITEM_ICON_CLASS = "jp-HerokuApp-itemIcon";

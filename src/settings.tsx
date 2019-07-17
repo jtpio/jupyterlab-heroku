@@ -1,14 +1,18 @@
+import { Debouncer } from "@jupyterlab/coreutils";
+
 import { HTMLSelect } from "@jupyterlab/ui-components";
+
+import { TextArea } from "@blueprintjs/core/lib/cjs/components/forms/textArea";
 
 import * as React from "react";
 
 import { Heroku } from "./heroku";
 
-const HEROKU_HEADER_CLASS = "jp-HerokuApp-header";
-const HEROKU_SETTINGS_ICON_CLASS = "jp-SettingsIcon";
-const HEROKU_SETTINGS_ITEM_CLASS = "jp-HerokuSettings-item";
+const HEROKU_HEADER_CLASS = "jp-Heroku-header";
+const HEROKU_SETTINGS_TITLE_CLASS = "jp-HerokuSettings-title";
+const HEROKU_SETTINGS_LIST_CLASS = "jp-HerokuSettings-sectionList";
 const HEROKU_SETTINGS_SELECT_CLASS = "jp-HerokuSettings-dropdown";
-const HEROKU_SETTINGS_ITEM_LABEL_CLASS = "jp-HerokuSettings-itemLabel";
+const HEROKU_SETTINGS_TEXTAREA_CLASS = "jp-HerokuSettings-textarea";
 const RUNTIMES = ["python-3.7.3", "python-3.6.8"];
 
 interface IHerokuSettingsProps {
@@ -18,6 +22,7 @@ interface IHerokuSettingsProps {
 interface IHerokuSettingsState {
   enabled: boolean;
   runtime: string;
+  dependencies: string;
 }
 
 interface IHerokuSettingsRuntimeProps {
@@ -27,6 +32,15 @@ interface IHerokuSettingsRuntimeProps {
 
 interface IHerokuSettingsRuntimeState {
   runtime: string;
+}
+
+interface IHerokuSettingsDependenciesProps {
+  setDependencies: (dependencies: string) => void;
+  dependencies?: string;
+}
+
+interface IHerokuSettingsDependenciesState {
+  dependencies: string;
 }
 
 class HerokuSettingsRuntimeComponent extends React.Component<
@@ -51,8 +65,8 @@ class HerokuSettingsRuntimeComponent extends React.Component<
   render() {
     return (
       <>
-        <div className={HEROKU_SETTINGS_ITEM_LABEL_CLASS} title="Runtime">
-          Runtime:
+        <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Runtime">
+          <h3>Runtime</h3>
         </div>
         <HTMLSelect
           className={HEROKU_SETTINGS_SELECT_CLASS}
@@ -76,6 +90,51 @@ class HerokuSettingsRuntimeComponent extends React.Component<
   }
 }
 
+class HerokuSettingsDependenciesComponent extends React.Component<
+  IHerokuSettingsDependenciesProps,
+  IHerokuSettingsDependenciesState
+> {
+  constructor(props: IHerokuSettingsDependenciesProps) {
+    super(props);
+    this.state = {
+      dependencies: props.dependencies
+    };
+    this._debouncer = new Debouncer(() => {
+      this.props.setDependencies(this.state.dependencies);
+    }, 2000);
+  }
+
+  componentWillUnmount = () => {
+    this._debouncer.dispose();
+  };
+
+  handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const dependencies = event.currentTarget.value;
+    this.setState({
+      dependencies
+    });
+    this._debouncer.invoke();
+  };
+
+  render() {
+    return (
+      <>
+        <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Dependencies">
+          <h3>Dependencies</h3>
+        </div>
+        <TextArea
+          className={`${HEROKU_SETTINGS_TEXTAREA_CLASS}`}
+          value={this.state.dependencies}
+          onChange={this.handleChange}
+          aria-label="Dependencies"
+        />
+      </>
+    );
+  }
+
+  private _debouncer: Debouncer;
+}
+
 export class HerokuSettingsComponent extends React.Component<
   IHerokuSettingsProps,
   IHerokuSettingsState
@@ -84,7 +143,8 @@ export class HerokuSettingsComponent extends React.Component<
     super(props);
     this.state = {
       enabled: false,
-      runtime: ""
+      runtime: "",
+      dependencies: ""
     };
     this.props.heroku.pathChanged.connect(this.getSettings, this);
   }
@@ -105,10 +165,11 @@ export class HerokuSettingsComponent extends React.Component<
         enabled: false
       });
     }
-    const { runtime } = settings;
+    const { runtime, dependencies } = settings;
     this.setState({
       enabled: true,
-      runtime
+      runtime,
+      dependencies
     });
   };
 
@@ -116,18 +177,25 @@ export class HerokuSettingsComponent extends React.Component<
     this.props.heroku.setSettings({ runtime });
   };
 
+  setDependencies = (dependencies: string) => {
+    this.props.heroku.setSettings({ dependencies });
+  };
+
   render() {
     return (
       <>
         <div className={HEROKU_HEADER_CLASS}>
-          <span className={HEROKU_SETTINGS_ICON_CLASS} />
           <h2>Settings</h2>
         </div>
         {this.state.enabled && (
-          <div className={HEROKU_SETTINGS_ITEM_CLASS}>
+          <div className={HEROKU_SETTINGS_LIST_CLASS}>
             <HerokuSettingsRuntimeComponent
               runtime={this.state.runtime}
               setRuntime={this.setRuntime}
+            />
+            <HerokuSettingsDependenciesComponent
+              dependencies={this.state.dependencies}
+              setDependencies={this.setDependencies}
             />
           </div>
         )}

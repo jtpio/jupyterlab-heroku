@@ -1,9 +1,13 @@
+@import url("~@blueprintjs/select/lib/css/blueprint-select.css");
+
 @import "./variables.css";
 
+/* Main Heroku Icon*/
 .jp-HerokuIcon {
   background: var(--jp-icon-heroku);
 }
 
+/* Main Heroku Widget */
 .jp-Heroku {
   padding-bottom: 0px;
   color: var(--jp-ui-font-color1);
@@ -13,7 +17,8 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-HerokuApp-header {
+/* Heroku Section Header */
+.jp-Heroku-header {
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
@@ -22,7 +27,8 @@
   justify-content: flex-end;
 }
 
-.jp-HerokuApp-header h2 {
+/* Heroku Section Header - Title */
+.jp-Heroku-header h2 {
   flex: 1 0 auto;
   font-weight: 600;
   text-transform: uppercase;
@@ -32,20 +38,22 @@
   margin: 0px;
 }
 
+/* Heroku Section Header - Toolbar Buttons */
 .jp-HerokuApp-header .jp-ToolbarButtonComponent {
   padding: 0px 16px;
 }
 
-.jp-HerokuApp-item,
-.jp-HerokuSettings-item {
+/* Heroku Apps listing - Entry */
+.jp-HerokuApp-item {
   display: flex;
   flex-direction: row;
   color: var(--jp-ui-font-color1);
+  margin-top: 10px;
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
-  margin-top: 10px;
 }
 
+/* Heroku Apps listing - Icons */
 .jp-HerokuApp-itemIcon {
   flex: 0 0 auto;
   padding: 0px 8px;
@@ -65,8 +73,8 @@
   color: var(--jp-error-color2);
 }
 
-.jp-HerokuApp-itemLabel,
-.jp-HerokuSettings-itemLabel {
+.jp-HerokuApp-itemLabel {
+  flex: 1 1 auto;
   font-size: var(--jp-ui-font-size1);
   margin-right: 4px;
   padding-left: 4px;
@@ -77,33 +85,54 @@
   transition: background-color 0.1s ease;
 }
 
-.jp-HerokuApp-itemLabel {
-  flex: 1 1 auto;
-}
-
-.jp-HerokuSettings-itemLabel {
-  flex: 0 0 auto;
-  padding: 0px 8px;
-  margin-right: 4px;
-  margin-left: 12px;
-  vertical-align: baseline;
-  flex: 0 0 auto;
-}
-
 .jp-HerokuApp-sectionList {
   margin: 0;
   padding: 0;
   list-style-type: none;
 }
 
-.jp-HerokuSettings-dropdown select {
-  height: 24px;
+/* Heroku Settings - Label */
+.jp-HerokuSettings-title h3 {
+  padding: 8px 8px 8px 12px;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Heroku Settings - List of settings */
+.jp-HerokuSettings-sectionList {
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+/* Heroku Settings - Dropdown */
+.jp-HerokuSettings-dropdown.bp3-html-select.jp-HTMLSelect {
+  margin: 10px;
+  height: 24;
   font-size: var(--jp-ui-font-size1);
   line-height: 14px;
   border-radius: 0;
   display: block;
+  color: var(--jp-ui-font-color0);
+  background: var(--jp-layout-color1);
 }
 
-.jp-HerokuSettings-dropdown span {
-  top: 5px !important;
+.jp-HerokuSettings-dropdown.bp3-html-select.jp-HTMLSelect select {
+  color: var(--jp-ui-font-color0);
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+}
+
+/* Heroku Settings - TextArea */
+.jp-HerokuSettings-textarea.bp3-input {
+  height: 150px;
+  margin: 10px;
+  font-size: var(--jp-ui-font-size1);
+  border-radius: 0;
+  color: var(--jp-ui-font-color0);
+  background: var(--jp-layout-color1);
+  border: var(--jp-border-width) solid var(--jp-toolbar-border-color);
 }
