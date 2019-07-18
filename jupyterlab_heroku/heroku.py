@@ -57,6 +57,13 @@ class Heroku:
         logs = out.decode("utf-8").splitlines()
         return {"code": code, "logs": logs}
 
+    async def create(self, current_path):
+        git_root = await self._get_git_root(current_path)
+        if not git_root:
+            return self._error(400, "Not in a git repository")
+
+        return {"code": 0}
+
     async def apps(self, current_path):
         all_remotes = await self._get_remotes(current_path)
         if not all_remotes:

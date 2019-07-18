@@ -19,6 +19,18 @@ class HerokuHandler(APIHandler):
         return self.get_json_body()["current_path"]
 
 
+class HerokuLogs(HerokuHandler):
+    async def post(self):
+        result = await self.heroku.logs(self.current_path)
+        self.finish(json.dumps(result))
+
+
+class HerokuCreate(HerokuHandler):
+    async def post(self):
+        result = await self.heroku.create(self.current_path)
+        self.finish(json.dumps(result))
+
+
 class HerokuApps(HerokuHandler):
     async def post(self):
         result = await self.heroku.apps(self.current_path)
@@ -47,12 +59,6 @@ class HerokuSettingsUpdate(HerokuHandler):
         self.finish(json.dumps(result))
 
 
-class HerokuLogs(HerokuHandler):
-    async def post(self):
-        result = await self.heroku.logs(self.current_path)
-        self.finish(json.dumps(result))
-
-
 def setup_handlers(web_app):
     """
     Setups the handlers for interacting with the heroku client.
@@ -60,6 +66,7 @@ def setup_handlers(web_app):
 
     heroku_handlers = [
         ("/heroku/logs", HerokuLogs),
+        ("/heroku/create", HerokuCreate),
         ("/heroku/apps", HerokuApps),
         ("/heroku/deploy", HerokuDeploy),
         ("/heroku/settings", HerokuSettings),

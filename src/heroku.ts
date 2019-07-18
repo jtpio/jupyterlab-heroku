@@ -7,6 +7,7 @@ import { ReadonlyJSONObject } from "@phosphor/coreutils";
 import { ISignal } from "@phosphor/signaling";
 
 const LOGS_ENDPOINT = "/heroku/logs";
+const CREATE_ENDPOINT = "/heroku/create";
 const APPS_ENDPOINT = "/heroku/apps";
 const DEPLOY_ENDPOINT = "/heroku/deploy";
 const GET_SETTINGS_ENDPOINT = "/heroku/settings";
@@ -34,6 +35,12 @@ export interface IHerokuApp {
 }
 
 export type IHerokuApps = IHerokuApp[];
+
+interface IHerokuAppCreateResponse {
+  code: number;
+  message?: string;
+  app?: IHerokuApp;
+}
 
 interface IHerokuAppsResponse {
   code: number;
@@ -85,6 +92,10 @@ export class Heroku {
 
   async logs(): Promise<ReadonlyJSONObject> {
     return this.herokuAction(LOGS_ENDPOINT);
+  }
+
+  async create(): Promise<IHerokuAppCreateResponse> {
+    return this.herokuAction<IHerokuAppCreateResponse>(CREATE_ENDPOINT);
   }
 
   async apps(): Promise<IHerokuApps> {
