@@ -94,6 +94,7 @@ class HerokuSettingsProcfileComponent extends React.Component<
         <InputGroup
           className={HEROKU_SETTINGS_INPUT_CLASS}
           onChange={this.handleChange}
+          placeholder="Command to execute"
           value={this.state.procfile}
           aria-label="Procfile"
         />
