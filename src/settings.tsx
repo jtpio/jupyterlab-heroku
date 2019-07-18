@@ -68,12 +68,15 @@ class HerokuSettingsProcfileComponent extends React.Component<
 > {
   constructor(props: IHerokuSettingsProcfileProps) {
     super(props);
-    this.state = {
-      procfile: props.procfile || DEFAULT_PROCFILE
-    };
     this._debouncer = new Debouncer(() => {
       this.props.setProcfile(this.state.procfile);
     }, SETTINGS_UPDATE_LIMIT);
+    this.state = {
+      procfile: props.procfile || DEFAULT_PROCFILE
+    };
+    if (!props.procfile) {
+      this._debouncer.invoke();
+    }
   }
 
   componentWillUnmount = () => {
@@ -117,6 +120,9 @@ class HerokuSettingsRuntimeComponent extends React.Component<
     this.state = {
       runtime: props.runtime || RUNTIMES[0]
     };
+    if (!props.runtime) {
+      this.props.setRuntime(this.state.runtime);
+    }
   }
 
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
