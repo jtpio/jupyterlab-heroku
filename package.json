@@ -37,6 +37,7 @@
     "@jupyterlab/coreutils": "^3.0.0",
     "@jupyterlab/filebrowser": "^1.0.0",
     "@jupyterlab/ui-components": "^1.0.0",
+    "@jupyterlab/terminal": "^1.0.0",
     "react": "~16.8.4",
     "react-dom": "~16.8.4"
   },

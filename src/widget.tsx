@@ -13,11 +13,13 @@ import { HerokuSettingsComponent } from "./settings";
 const HEROKU_WIDGET_CLASS = "jp-Heroku";
 
 export class HerokuWidget extends Widget {
-  constructor(heroku: Heroku) {
+  constructor(heroku: Heroku, runInTerminal: (cmd: string) => void) {
     super();
     this.addClass(HEROKU_WIDGET_CLASS);
 
-    let apps = ReactWidget.create(<HerokuAppsComponent heroku={heroku} />);
+    let apps = ReactWidget.create(
+      <HerokuAppsComponent heroku={heroku} runInTerminal={runInTerminal} />
+    );
     let settings = ReactWidget.create(
       <HerokuSettingsComponent heroku={heroku} />
     );

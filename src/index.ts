@@ -5,7 +5,6 @@ import {
 
 import { IFileBrowserFactory } from "@jupyterlab/filebrowser";
 
-import { addCommands } from "./commands";
 import { HerokuWidget } from "./widget";
 import { Heroku } from "./heroku";
 
@@ -21,9 +20,27 @@ const extension: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [IFileBrowserFactory],
   activate: (app: JupyterFrontEnd, fileBrowserFactory: IFileBrowserFactory) => {
-    addCommands(app);
+    const { commands } = app;
     let heroku = new Heroku(fileBrowserFactory);
-    let widget = new HerokuWidget(heroku);
+
+    const runInTerminal = async (cmd: string) => {
+      const terminalWidget = await commands.execute("terminal:create-new");
+      app.shell.add(terminalWidget, "main", { mode: "split-right" });
+
+      const terminal = terminalWidget.content;
+      try {
+        terminal.session.send({
+          type: "stdin",
+          content: [cmd + "\n"]
+        });
+        return terminalWidget;
+      } catch (e) {
+        console.error(e);
+        terminalWidget.dispose();
+      }
+    };
+
+    let widget = new HerokuWidget(heroku, runInTerminal);
     widget.id = "jp-heroku";
     widget.title.iconClass = "jp-SideBar-tabIcon jp-HerokuIcon";
     widget.title.caption = "Heroku";

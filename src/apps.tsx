@@ -16,15 +16,18 @@ const HEROKU_APP_OPEN_ICON_CLASS = "jp-RefreshIcon";
 
 interface IHerokuAppsProps {
   heroku: Heroku;
+  runInTerminal: (cmd: string) => void;
 }
 
 interface IHerokuAppListProps {
   deploy: Function;
+  logs: (app: string) => void;
   apps: IHerokuApps;
 }
 
 interface IHerokuAppProps {
   deploy: Function;
+  logs: (app: string) => void;
   app: IHerokuApp;
 }
 
@@ -45,6 +48,10 @@ class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
       error: false
     };
   }
+
+  logs = async () => {
+    this.props.logs(this.props.app.name);
+  };
 
   deploy = async () => {
     this.setState({ deploying: true });
@@ -93,6 +100,11 @@ class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
           {this.props.app.name}
         </span>
         <ToolbarButtonComponent
+          tooltip="Show Logs"
+          iconClassName="jp-TextEditorIcon"
+          onClick={this.logs}
+        />
+        <ToolbarButtonComponent
           tooltip="Open App"
           iconClassName="jp-LauncherIcon"
           onClick={() => {
@@ -111,11 +123,11 @@ class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
 }
 
 function ListView(props: IHerokuAppListProps) {
-  const { apps, deploy } = props;
+  const { apps, ...rest } = props;
   return (
     <ul className={HEROKU_APP_LIST_CLASS}>
       {apps.map((props, i) => (
-        <Item key={i} deploy={deploy} app={props} />
+        <Item key={i} app={props} {...rest} />
       ))}
     </ul>
   );
@@ -132,6 +144,12 @@ export class HerokuAppsComponent extends React.Component<
     };
     this.props.heroku.pathChanged.connect(this.refreshApps, this);
   }
+
+  viewAppLogs = async (app: string) => {
+    const path = this.props.heroku.currentPath;
+    const cmd = `cd ${path} && heroku logs -t -a ${app}`;
+    await this.props.runInTerminal(cmd);
+  };
 
   componentDidMount = () => {
     this.refreshApps();
@@ -167,7 +185,11 @@ export class HerokuAppsComponent extends React.Component<
             onClick={this.refreshApps}
           />
         </div>
-        <ListView deploy={this.deploy} apps={...this.state.apps} />
+        <ListView
+          deploy={this.deploy}
+          logs={this.viewAppLogs}
+          apps={...this.state.apps}
+        />
       </>
     );
   }

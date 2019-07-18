@@ -121,5 +121,9 @@ export class Heroku {
     return this._fileBrowserFactory.defaultBrowser.model.pathChanged;
   }
 
+  get currentPath(): string {
+    return this._fileBrowserFactory.defaultBrowser.model.path;
+  }
+
   readonly _fileBrowserFactory: IFileBrowserFactory;
 }
