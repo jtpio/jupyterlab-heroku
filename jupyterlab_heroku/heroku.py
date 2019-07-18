@@ -41,6 +41,19 @@ class Heroku:
             return []
         return out.decode("utf-8").splitlines()
 
+    async def _execute_command(self, current_path, cmd):
+        p = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=PIPE,
+            stderr=PIPE,
+            cwd=os.path.join(self.root_dir, current_path),
+        )
+        out, err = await p.communicate()
+        code = p.returncode
+        if code != 0:
+            return code, err.decode("utf-8")
+        return code, out.decode("utf-8")
+
     async def logs(self, current_path):
         cmd = ["heroku", "logs"]
         p = await asyncio.create_subprocess_exec(
@@ -62,7 +75,18 @@ class Heroku:
         if not git_root:
             return self._error(400, "Not in a git repository")
 
-        return {"code": 0}
+        cmd = ["git", "remote", "remove", "heroku"]
+        code, res = await self._execute_command(current_path, cmd)
+        if code != 0:
+            return self._error(code, res)
+
+        cmd = ["heroku", "create", "--json", "-r", "heroku"]
+        code, res = await self._execute_command(current_path, cmd)
+        if code != 0:
+            return self._error(code, res)
+
+        app = json.loads(res)
+        return {"code": code, "app": app}
 
     async def apps(self, current_path):
         all_remotes = await self._get_remotes(current_path)

@@ -43,6 +43,7 @@ interface IHerokuAppState {
 
 interface IHerokuAppsState {
   apps: IHerokuApps;
+  creating: boolean;
 }
 
 class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
@@ -145,7 +146,8 @@ export class HerokuAppsComponent extends React.Component<
   constructor(props: IHerokuAppsProps) {
     super(props);
     this.state = {
-      apps: []
+      apps: [],
+      creating: false
     };
     this.props.heroku.pathChanged.connect(this.refreshApps, this);
   }
@@ -165,7 +167,10 @@ export class HerokuAppsComponent extends React.Component<
   };
 
   createApp = async () => {
+    this.setState({ creating: true });
     const response = await this.props.heroku.create();
+    this.setState({ creating: false });
+
     if (response.message) {
       let title = <span className="">Not a Git Repository</span>;
       let body = (
@@ -191,6 +196,8 @@ export class HerokuAppsComponent extends React.Component<
         ]
       });
     }
+
+    this.refreshApps();
   };
 
   refreshApps = async () => {
@@ -214,6 +221,7 @@ export class HerokuAppsComponent extends React.Component<
         <div className={HEROKU_HEADER_CLASS}>
           <h2>Heroku apps</h2>
           <ToolbarButtonComponent
+            enabled={!this.state.creating}
             tooltip="Create New App"
             iconClassName={HEROKU_APP_CREATE_ICON_CLASS}
             onClick={this.createApp}
