@@ -9,13 +9,15 @@ import { ISignal } from "@phosphor/signaling";
 const LOGS_ENDPOINT = "/heroku/logs";
 const APPS_ENDPOINT = "/heroku/apps";
 const DEPLOY_ENDPOINT = "/heroku/deploy";
+const GET_SETTINGS_ENDPOINT = "/heroku/settings";
+const POST_SETTINGS_ENDPOINT = "/heroku/settings/update";
 
 function httpRequest(
   url: string,
   method: string,
   request?: Object
 ): Promise<Response> {
-  let fullRequest = {
+  let fullRequest: RequestInit = {
     method: method,
     body: JSON.stringify(request)
   };
@@ -38,7 +40,18 @@ interface IHerokuAppsResponse {
   apps: IHerokuApps;
 }
 
-interface IHerokuDeployResponse {
+interface IHerokuSettings {
+  runtime?: string;
+  dependencies?: string;
+  procfile?: string;
+}
+
+interface IHerokuSettingsResponse {
+  code: number;
+  settings?: IHerokuSettings;
+}
+
+interface IHerokuResponse {
   code: number;
   message?: string;
 }
@@ -53,10 +66,15 @@ export class Heroku {
   }
 
   private async herokuAction<ReturnType>(
-    endpoint: string
+    endpoint: string,
+    method: string = "POST",
+    data: Object = {}
   ): Promise<ReturnType> {
     const path = this.getCurrentPath();
-    const request = httpRequest(endpoint, "POST", { current_path: path });
+    const request = httpRequest(endpoint, method, {
+      current_path: path,
+      ...data
+    });
     const response = await request;
     if (!response.ok) {
       const data = await response.json();
@@ -76,11 +94,27 @@ export class Heroku {
     return response.apps;
   }
 
-  async deploy(): Promise<IHerokuDeployResponse> {
-    const response = await this.herokuAction<IHerokuDeployResponse>(
-      DEPLOY_ENDPOINT
-    );
+  async deploy(): Promise<IHerokuResponse> {
+    const response = await this.herokuAction<IHerokuResponse>(DEPLOY_ENDPOINT);
     return response;
+  }
+
+  async updateSettings(settings: IHerokuSettings): Promise<void> {
+    const response = await this.herokuAction<IHerokuResponse>(
+      POST_SETTINGS_ENDPOINT,
+      "POST",
+      { ...settings }
+    );
+    if (response.message) {
+      console.error(response.message);
+    }
+  }
+
+  async settings(): Promise<IHerokuSettings> {
+    const response = await this.herokuAction<IHerokuSettingsResponse>(
+      GET_SETTINGS_ENDPOINT
+    );
+    return response.settings;
   }
 
   get pathChanged(): ISignal<FileBrowserModel, IChangedArgs<string>> {
