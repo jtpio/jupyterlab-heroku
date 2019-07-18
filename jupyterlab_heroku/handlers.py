@@ -36,13 +36,14 @@ class HerokuSettings(HerokuHandler):
         body = self.get_json_body()
         runtime = body.get("runtime")
         dependencies = body.get("dependencies")
+        procfile = body.get("procfile")
 
         # FIXME: handle this better
-        if not runtime and not dependencies:
+        if not runtime and not dependencies and not procfile:
             result = await self.heroku.settings(self.current_path)
             return self.finish(json.dumps(result))
 
-        result = await self.heroku.set_settings(self.current_path, runtime, dependencies)
+        result = await self.heroku.set_settings(self.current_path, runtime, dependencies, procfile)
         self.finish(json.dumps(result))
 
 

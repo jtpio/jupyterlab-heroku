@@ -42,6 +42,7 @@ interface IHerokuAppsResponse {
 interface IHerokuSettings {
   runtime?: string;
   dependencies?: string;
+  procfile?: string;
 }
 
 interface IHerokuSettingsResponse {

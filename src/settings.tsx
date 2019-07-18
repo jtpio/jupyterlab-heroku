@@ -1,6 +1,6 @@
 import { Debouncer } from "@jupyterlab/coreutils";
 
-import { HTMLSelect } from "@jupyterlab/ui-components";
+import { HTMLSelect, InputGroup } from "@jupyterlab/ui-components";
 
 import { TextArea } from "@blueprintjs/core/lib/cjs/components/forms/textArea";
 
@@ -12,8 +12,14 @@ const HEROKU_HEADER_CLASS = "jp-Heroku-header";
 const HEROKU_SETTINGS_TITLE_CLASS = "jp-HerokuSettings-title";
 const HEROKU_SETTINGS_LIST_CLASS = "jp-HerokuSettings-sectionList";
 const HEROKU_SETTINGS_SELECT_CLASS = "jp-HerokuSettings-dropdown";
+const HEROKU_SETTINGS_INPUT_CLASS = "jp-HerokuSettings-input";
 const HEROKU_SETTINGS_TEXTAREA_CLASS = "jp-HerokuSettings-textarea";
+
 const RUNTIMES = ["python-3.7.3", "python-3.6.8"];
+const DEFAULT_PROCFILE = "web: voila --port=$PORT --no-browser";
+
+// debounce settings updates
+const SETTINGS_UPDATE_LIMIT = 2000;
 
 interface IHerokuSettingsProps {
   heroku: Heroku;
@@ -23,6 +29,7 @@ interface IHerokuSettingsState {
   enabled: boolean;
   runtime: string;
   dependencies: string;
+  procfile: string;
 }
 
 interface IHerokuSettingsRuntimeProps {
@@ -41,6 +48,60 @@ interface IHerokuSettingsDependenciesProps {
 
 interface IHerokuSettingsDependenciesState {
   dependencies: string;
+}
+
+interface IHerokuSettingsProcfileProps {
+  setProcfile: (procfile: string) => void;
+  procfile?: string;
+}
+
+interface IHerokuSettingsProcfileState {
+  procfile: string;
+}
+
+class HerokuSettingsProcfileComponent extends React.Component<
+  IHerokuSettingsProcfileProps,
+  IHerokuSettingsProcfileState
+> {
+  constructor(props: IHerokuSettingsProcfileProps) {
+    super(props);
+    this.state = {
+      procfile: props.procfile || DEFAULT_PROCFILE
+    };
+    this._debouncer = new Debouncer(() => {
+      this.props.setProcfile(this.state.procfile);
+    }, SETTINGS_UPDATE_LIMIT);
+  }
+
+  componentWillUnmount = () => {
+    this._debouncer.dispose();
+  };
+
+  handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const procfile = event.currentTarget.value;
+    this.setState({
+      procfile
+    });
+    this._debouncer.invoke();
+  };
+
+  render() {
+    return (
+      <>
+        <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Procfile">
+          <h4>Procfile</h4>
+        </div>
+        <InputGroup
+          className={HEROKU_SETTINGS_INPUT_CLASS}
+          onChange={this.handleChange}
+          value={this.state.procfile}
+          aria-label="Procfile"
+        />
+      </>
+    );
+  }
+
+  private _debouncer: Debouncer;
 }
 
 class HerokuSettingsRuntimeComponent extends React.Component<
@@ -101,7 +162,7 @@ class HerokuSettingsDependenciesComponent extends React.Component<
     };
     this._debouncer = new Debouncer(() => {
       this.props.setDependencies(this.state.dependencies);
-    }, 2000);
+    }, SETTINGS_UPDATE_LIMIT);
   }
 
   componentWillUnmount = () => {
@@ -144,7 +205,8 @@ export class HerokuSettingsComponent extends React.Component<
     this.state = {
       enabled: false,
       runtime: "",
-      dependencies: ""
+      dependencies: "",
+      procfile: ""
     };
     this.props.heroku.pathChanged.connect(this.getSettings, this);
   }
@@ -173,6 +235,10 @@ export class HerokuSettingsComponent extends React.Component<
     });
   };
 
+  setProcfile = (procfile: string) => {
+    this.props.heroku.setSettings({ procfile });
+  };
+
   setRuntime = (runtime: string) => {
     this.props.heroku.setSettings({ runtime });
   };
@@ -189,6 +255,10 @@ export class HerokuSettingsComponent extends React.Component<
         </div>
         {this.state.enabled && (
           <div className={HEROKU_SETTINGS_LIST_CLASS}>
+            <HerokuSettingsProcfileComponent
+              procfile={this.state.procfile}
+              setProcfile={this.setProcfile}
+            />
             <HerokuSettingsRuntimeComponent
               runtime={this.state.runtime}
               setRuntime={this.setRuntime}

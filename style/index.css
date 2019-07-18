@@ -49,6 +49,7 @@
   flex-direction: row;
   color: var(--jp-ui-font-color1);
   margin-top: 10px;
+  margin-left: 16px;
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
 }
@@ -56,9 +57,6 @@
 /* Heroku Apps listing - Icons */
 .jp-HerokuApp-itemIcon {
   flex: 0 0 auto;
-  padding: 0px 8px;
-  margin-right: 4px;
-  margin-left: 12px;
   vertical-align: baseline;
   background-size: 16px;
   background-repeat: no-repeat;
@@ -106,6 +104,17 @@
   margin: 0;
   padding: 0;
   list-style-type: none;
+}
+
+/* Heroku Settings - Input */
+.jp-HerokuSettings-input.bp3-input-group.jp-InputGroup {
+  margin: 5px 16px;
+  height: 24;
+  font-size: var(--jp-ui-font-size1);
+  line-height: 14px;
+  border-radius: 0;
+  color: var(--jp-ui-font-color0);
+  background: var(--jp-layout-color1);
 }
 
 /* Heroku Settings - Dropdown */

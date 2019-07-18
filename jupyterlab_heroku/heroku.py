@@ -107,7 +107,7 @@ class Heroku:
         if not git_root:
             return self._error(500, "Not in a git repository")
 
-        runtime, dependencies = "", ""
+        runtime, dependencies, procfile = "", "", ""
 
         runtime_file = f"{git_root}/runtime.txt"
         if os.path.exists(runtime_file):
@@ -119,13 +119,18 @@ class Heroku:
             with open(dependencies_file) as f:
                 dependencies = f.read().strip()
 
+        procfile_file = f"{git_root}/Procfile"
+        if os.path.exists(procfile_file):
+            with open(procfile_file) as f:
+                procfile = f.read().strip()
+
         return {
             "code": 0,
-            "settings": {"runtime": runtime, "dependencies": dependencies},
+            "settings": {"runtime": runtime, "dependencies": dependencies, "procfile": procfile},
         }
 
-    async def set_settings(self, current_path, runtime=None, dependencies=None):
-        if not runtime and not dependencies:
+    async def set_settings(self, current_path, runtime=None, dependencies=None, procfile=None):
+        if not runtime and not dependencies and not procfile:
             return self._error(400, "No settings specified")
 
         all_remotes = await self._get_remotes(current_path)
@@ -143,5 +148,9 @@ class Heroku:
         if dependencies is not None:
             with open(f"{git_root}/requirements.txt", "w") as f:
                 f.write(f"{dependencies}\n")
+
+        if procfile is not None:
+            with open(f"{git_root}/Procfile", "w") as f:
+                f.write(f"{procfile}\n")
 
         return {"code": 0}
