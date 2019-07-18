@@ -129,7 +129,7 @@ class Heroku:
             "settings": {"runtime": runtime, "dependencies": dependencies, "procfile": procfile},
         }
 
-    async def set_settings(self, current_path, runtime=None, dependencies=None, procfile=None):
+    async def update_settings(self, current_path, runtime=None, dependencies=None, procfile=None):
         if not runtime and not dependencies and not procfile:
             return self._error(400, "No settings specified")
 

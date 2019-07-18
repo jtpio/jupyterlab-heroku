@@ -33,17 +33,17 @@ class HerokuDeploy(HerokuHandler):
 
 class HerokuSettings(HerokuHandler):
     async def post(self):
+        result = await self.heroku.settings(self.current_path)
+        return self.finish(json.dumps(result))
+
+
+class HerokuSettingsUpdate(HerokuHandler):
+    async def post(self):
         body = self.get_json_body()
         runtime = body.get("runtime")
         dependencies = body.get("dependencies")
         procfile = body.get("procfile")
-
-        # FIXME: handle this better
-        if not runtime and not dependencies and not procfile:
-            result = await self.heroku.settings(self.current_path)
-            return self.finish(json.dumps(result))
-
-        result = await self.heroku.set_settings(self.current_path, runtime, dependencies, procfile)
+        result = await self.heroku.update_settings(self.current_path, runtime, dependencies, procfile)
         self.finish(json.dumps(result))
 
 
@@ -63,6 +63,7 @@ def setup_handlers(web_app):
         ("/heroku/apps", HerokuApps),
         ("/heroku/deploy", HerokuDeploy),
         ("/heroku/settings", HerokuSettings),
+        ("/heroku/settings/update", HerokuSettingsUpdate),
     ]
 
     base_url = web_app.settings["base_url"]

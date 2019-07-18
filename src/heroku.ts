@@ -9,14 +9,15 @@ import { ISignal } from "@phosphor/signaling";
 const LOGS_ENDPOINT = "/heroku/logs";
 const APPS_ENDPOINT = "/heroku/apps";
 const DEPLOY_ENDPOINT = "/heroku/deploy";
-const SETTINGS_ENDPOINT = "/heroku/settings";
+const GET_SETTINGS_ENDPOINT = "/heroku/settings";
+const POST_SETTINGS_ENDPOINT = "/heroku/settings/update";
 
 function httpRequest(
   url: string,
   method: string,
   request?: Object
 ): Promise<Response> {
-  let fullRequest = {
+  let fullRequest: RequestInit = {
     method: method,
     body: JSON.stringify(request)
   };
@@ -98,9 +99,9 @@ export class Heroku {
     return response;
   }
 
-  async setSettings(settings: IHerokuSettings): Promise<void> {
+  async updateSettings(settings: IHerokuSettings): Promise<void> {
     const response = await this.herokuAction<IHerokuResponse>(
-      SETTINGS_ENDPOINT,
+      POST_SETTINGS_ENDPOINT,
       "POST",
       { ...settings }
     );
@@ -111,7 +112,7 @@ export class Heroku {
 
   async settings(): Promise<IHerokuSettings> {
     const response = await this.herokuAction<IHerokuSettingsResponse>(
-      SETTINGS_ENDPOINT
+      GET_SETTINGS_ENDPOINT
     );
     return response.settings;
   }

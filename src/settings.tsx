@@ -1,3 +1,5 @@
+import { ToolbarButtonComponent } from "@jupyterlab/apputils";
+
 import { Debouncer } from "@jupyterlab/coreutils";
 
 import { HTMLSelect, InputGroup } from "@jupyterlab/ui-components";
@@ -9,6 +11,7 @@ import * as React from "react";
 import { Heroku } from "./heroku";
 
 const HEROKU_HEADER_CLASS = "jp-Heroku-header";
+const HEROKU_SETTINGS_REFRESH_ICON_CLASS = "jp-RefreshIcon";
 const HEROKU_SETTINGS_TITLE_CLASS = "jp-HerokuSettings-title";
 const HEROKU_SETTINGS_LIST_CLASS = "jp-HerokuSettings-sectionList";
 const HEROKU_SETTINGS_SELECT_CLASS = "jp-HerokuSettings-dropdown";
@@ -228,24 +231,25 @@ export class HerokuSettingsComponent extends React.Component<
         enabled: false
       });
     }
-    const { runtime, dependencies } = settings;
+    const { runtime, dependencies, procfile } = settings;
     this.setState({
       enabled: true,
       runtime,
-      dependencies
+      dependencies,
+      procfile
     });
   };
 
   setProcfile = (procfile: string) => {
-    this.props.heroku.setSettings({ procfile });
+    this.props.heroku.updateSettings({ procfile });
   };
 
   setRuntime = (runtime: string) => {
-    this.props.heroku.setSettings({ runtime });
+    this.props.heroku.updateSettings({ runtime });
   };
 
   setDependencies = (dependencies: string) => {
-    this.props.heroku.setSettings({ dependencies });
+    this.props.heroku.updateSettings({ dependencies });
   };
 
   render() {
@@ -253,6 +257,11 @@ export class HerokuSettingsComponent extends React.Component<
       <>
         <div className={HEROKU_HEADER_CLASS}>
           <h2>Settings</h2>
+          <ToolbarButtonComponent
+            tooltip="Refresh Settings"
+            iconClassName={HEROKU_SETTINGS_REFRESH_ICON_CLASS}
+            onClick={this.getSettings}
+          />
         </div>
         {this.state.enabled && (
           <div className={HEROKU_SETTINGS_LIST_CLASS}>
