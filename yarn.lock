@@ -25,7 +25,7 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
-"@blueprintjs/core@^3.17.0", "@blueprintjs/core@^3.9.0":
+"@blueprintjs/core@^3.15.1", "@blueprintjs/core@^3.17.0", "@blueprintjs/core@^3.9.0":
   version "3.17.1"
   resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.17.1.tgz#c6ea0df795e046848a16b3d9242225fef34091ee"
   integrity sha512-VROTlhBaNaRN9kfscTQwZqRvGZmZYGfPkzcP8w50+wF/XMiK0xNEF4mRNQKXLNIduIZta5uPagZgIh68UG5dTg==
@@ -282,6 +282,19 @@
     "@phosphor/widgets" "^1.8.0"
     react "~16.8.4"
     typestyle "^2.0.1"
+
+"@jupyterlab/terminal@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/terminal/-/terminal-1.0.1.tgz#278a66b48a596118e9dfe4a547a79420bef1b387"
+  integrity sha512-hmb/cZoJFgUGh5B+HjqW5YfM12B/kM2MVCalWrF83XDrTg3wpN/0kKdNJ0ZRcJ1cSOkNKHlZ94uooYKucrb5Jw==
+  dependencies:
+    "@jupyterlab/apputils" "^1.0.1"
+    "@jupyterlab/services" "^4.0.1"
+    "@phosphor/coreutils" "^1.3.1"
+    "@phosphor/domutils" "^1.1.3"
+    "@phosphor/messaging" "^1.2.3"
+    "@phosphor/widgets" "^1.8.0"
+    xterm "~3.13.2"
 
 "@jupyterlab/ui-components@^1.0.0":
   version "1.0.0"
@@ -2677,6 +2690,11 @@ xtend@^4.0.1:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/xtend/-/xtend-4.0.2.tgz#bb72779f5fa465186b1f438f674fa347fdb5db54"
   integrity sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==
+
+xterm@~3.13.2:
+  version "3.13.2"
+  resolved "https://registry.yarnpkg.com/xterm/-/xterm-3.13.2.tgz#987c3a7fe3d23d6c03ce0eaf06c0554c38935570"
+  integrity sha512-4utKoF16/pzH6+EkFaaay+qPCozf5RP2P0JuH6rvIGHY0CRwgU2LwbQ/24DY+TvaZ5m+kwvIUvPqIBoMZYfgOg==
 
 yup@^0.27.0:
   version "0.27.0"
