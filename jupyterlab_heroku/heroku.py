@@ -76,9 +76,8 @@ class Heroku:
             return self._error(400, "Not in a git repository")
 
         cmd = ["git", "remote", "remove", "heroku"]
-        code, res = await self._execute_command(current_path, cmd)
-        if code != 0:
-            return self._error(code, res)
+        # ignore error if the remote doesn't exist
+        _ = await self._execute_command(current_path, cmd)
 
         cmd = ["heroku", "create", "--json", "-r", "heroku"]
         code, res = await self._execute_command(current_path, cmd)
