@@ -1,4 +1,8 @@
-import { ToolbarButtonComponent } from "@jupyterlab/apputils";
+import {
+  ToolbarButtonComponent,
+  showDialog,
+  Dialog
+} from "@jupyterlab/apputils";
 
 import * as React from "react";
 
@@ -12,7 +16,8 @@ const HEROKU_APP_ITEM_SUCCESS_CLASS = "jp-HerokuApp-itemSuccess";
 const HEROKU_APP_ITEM_ERROR_CLASS = "jp-HerokuApp-itemError";
 const HEROKU_APP_ITEM_LABEL_CLASS = "jp-HerokuApp-itemLabel";
 const HEROKU_APP_DEPLOY_ICON_CLASS = "jp-FileUploadIcon";
-const HEROKU_APP_OPEN_ICON_CLASS = "jp-RefreshIcon";
+const HEROKU_APP_CREATE_ICON_CLASS = "jp-AddIcon";
+const HEROKU_APP_REFRESH_ICON_CLASS = "jp-RefreshIcon";
 
 interface IHerokuAppsProps {
   heroku: Heroku;
@@ -38,6 +43,7 @@ interface IHerokuAppState {
 
 interface IHerokuAppsState {
   apps: IHerokuApps;
+  creating: boolean;
 }
 
 class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
@@ -140,7 +146,8 @@ export class HerokuAppsComponent extends React.Component<
   constructor(props: IHerokuAppsProps) {
     super(props);
     this.state = {
-      apps: []
+      apps: [],
+      creating: false
     };
     this.props.heroku.pathChanged.connect(this.refreshApps, this);
   }
@@ -157,6 +164,40 @@ export class HerokuAppsComponent extends React.Component<
 
   componentWillUnmount = () => {
     this.props.heroku.pathChanged.disconnect(this.refreshApps, this);
+  };
+
+  createApp = async () => {
+    this.setState({ creating: true });
+    const response = await this.props.heroku.create();
+    this.setState({ creating: false });
+
+    if (response.message) {
+      let title = <span className="">Not a Git Repository</span>;
+      let body = (
+        <>
+          <p>
+            The current folder does not appear to be a Git repository. Heroku
+            uses Git to manage and create applications.
+          </p>
+          <p>
+            From the command line with `git init` or using the Git Extension for
+            JupyterLab.
+          </p>
+        </>
+      );
+      return showDialog({
+        title,
+        body,
+        buttons: [
+          Dialog.createButton({
+            label: "Dismiss",
+            className: "jp-About-button jp-mod-reject jp-mod-styled"
+          })
+        ]
+      });
+    }
+
+    this.refreshApps();
   };
 
   refreshApps = async () => {
@@ -180,8 +221,14 @@ export class HerokuAppsComponent extends React.Component<
         <div className={HEROKU_HEADER_CLASS}>
           <h2>Heroku apps</h2>
           <ToolbarButtonComponent
+            enabled={!this.state.creating}
+            tooltip="Create New App"
+            iconClassName={HEROKU_APP_CREATE_ICON_CLASS}
+            onClick={this.createApp}
+          />
+          <ToolbarButtonComponent
             tooltip="Refresh Apps"
-            iconClassName={HEROKU_APP_OPEN_ICON_CLASS}
+            iconClassName={HEROKU_APP_REFRESH_ICON_CLASS}
             onClick={this.refreshApps}
           />
         </div>

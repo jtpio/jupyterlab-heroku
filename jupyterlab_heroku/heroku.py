@@ -12,8 +12,7 @@ class Heroku:
     def _error(self, code, message):
         return {"code": code, "message": message}
 
-    async def _get_git_root(self, current_path):
-        cmd = ["git", "rev-parse", "--show-toplevel"]
+    async def _execute_command(self, current_path, cmd):
         p = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=PIPE,
@@ -23,39 +22,49 @@ class Heroku:
         out, err = await p.communicate()
         code = p.returncode
         if code != 0:
+            return code, err.decode("utf-8")
+        return code, out.decode("utf-8")
+
+    async def _get_git_root(self, current_path):
+        cmd = ["git", "rev-parse", "--show-toplevel"]
+        code, res = await self._execute_command(current_path, cmd)
+        if code != 0:
             return
-        return out.decode("utf-8").strip()
+        return res.strip()
 
     async def _get_remotes(self, current_path):
         # TODO: handle multiple remotes / apps
         cmd = ["git", "remote", "get-url", "heroku"]
-        p = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
-        )
-        out, err = await p.communicate()
-        code = p.returncode
+        code, res = await self._execute_command(current_path, cmd)
         if code != 0:
             return []
-        return out.decode("utf-8").splitlines()
+        return res.splitlines()
 
     async def logs(self, current_path):
         cmd = ["heroku", "logs"]
-        p = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
-        )
-        out, err = await p.communicate()
-        code = p.returncode
+        code, res = await self._execute_command(current_path, cmd)
         if code != 0:
-            return self._error(code, err.decode("utf-8"))
+            return self._error(code, res)
 
-        logs = out.decode("utf-8").splitlines()
+        logs = res.splitlines()
         return {"code": code, "logs": logs}
+
+    async def create(self, current_path):
+        git_root = await self._get_git_root(current_path)
+        if not git_root:
+            return self._error(400, "Not in a git repository")
+
+        cmd = ["git", "remote", "remove", "heroku"]
+        # ignore error if the remote doesn't exist
+        _ = await self._execute_command(current_path, cmd)
+
+        cmd = ["heroku", "create", "--json", "-r", "heroku"]
+        code, res = await self._execute_command(current_path, cmd)
+        if code != 0:
+            return self._error(code, res)
+
+        app = json.loads(res)
+        return {"code": code, "app": app}
 
     async def apps(self, current_path):
         all_remotes = await self._get_remotes(current_path)
@@ -63,18 +72,11 @@ class Heroku:
             return {"code": 0, "apps": []}
 
         cmd = ["heroku", "apps", "--json"]
-        p = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
-        )
-        out, err = await p.communicate()
-        code = p.returncode
+        code, res = await self._execute_command(current_path, cmd)
         if code != 0:
-            return self._error(p.returncode, err.decode("utf-8"))
+            return self._error(code, res)
 
-        all_apps = json.loads(out.decode("utf-8"))
+        all_apps = json.loads(res)
         remotes = set(all_remotes)
         apps = [app for app in all_apps if app["git_url"] in remotes]
         return {"code": code, "apps": apps}
@@ -85,16 +87,9 @@ class Heroku:
             return self._error(500, "No Heroku remote in the current directory")
 
         cmd = ["git", "push", "heroku", "master"]
-        p = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=PIPE,
-            stderr=PIPE,
-            cwd=os.path.join(self.root_dir, current_path),
-        )
-        out, err = await p.communicate()
-        code = p.returncode
+        code, res = await self._execute_command(current_path, cmd)
         if code != 0:
-            return self._error(p.returncode, err.decode("utf-8"))
+            return self._error(code, res)
 
         return {"code": code}
 
