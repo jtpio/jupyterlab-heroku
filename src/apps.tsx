@@ -25,13 +25,15 @@ interface IHerokuAppsProps {
 }
 
 interface IHerokuAppListProps {
-  deploy: Function;
+  deploy: () => Promise<boolean>;
+  destroy: (app: string) => void;
   logs: (app: string) => void;
   apps: IHerokuApps;
 }
 
 interface IHerokuAppProps {
-  deploy: Function;
+  deploy: () => Promise<boolean>;
+  destroy: (app: string) => void;
   logs: (app: string) => void;
   app: IHerokuApp;
 }
@@ -54,6 +56,10 @@ class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
       error: false
     };
   }
+
+  destroy = async () => {
+    this.props.destroy(this.props.app.name);
+  };
 
   logs = async () => {
     this.props.logs(this.props.app.name);
@@ -105,6 +111,11 @@ class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
         >
           {this.props.app.name}
         </span>
+        <ToolbarButtonComponent
+          tooltip="Destroy App"
+          iconClassName="jp-CloseIcon"
+          onClick={this.destroy}
+        />
         <ToolbarButtonComponent
           tooltip="Show Logs"
           iconClassName="jp-TextEditorIcon"
@@ -200,6 +211,19 @@ export class HerokuAppsComponent extends React.Component<
     this.refreshApps();
   };
 
+  destroyApp = async (app: string) => {
+    let destroyButton = Dialog.warnButton({ label: "Destroy" });
+    const result = await showDialog({
+      title: "Destroy App?",
+      body: `Do you really want to destroy the app ${app}? This cannot be undone`,
+      buttons: [Dialog.cancelButton(), destroyButton]
+    });
+    if (result.button.accept) {
+      await this.props.heroku.destroy(app);
+      this.refreshApps();
+    }
+  };
+
   refreshApps = async () => {
     this.setState({ apps: [] });
     const apps = await this.props.heroku.apps();
@@ -234,6 +258,7 @@ export class HerokuAppsComponent extends React.Component<
         </div>
         <ListView
           deploy={this.deploy}
+          destroy={this.destroyApp}
           logs={this.viewAppLogs}
           apps={...this.state.apps}
         />

@@ -31,6 +31,14 @@ class HerokuCreate(HerokuHandler):
         self.finish(json.dumps(result))
 
 
+class HerokuDestroy(HerokuHandler):
+    async def post(self):
+        body = self.get_json_body()
+        app = body.get("app")
+        result = await self.heroku.destroy(self.current_path, app)
+        self.finish(json.dumps(result))
+
+
 class HerokuApps(HerokuHandler):
     async def post(self):
         result = await self.heroku.apps(self.current_path)
@@ -67,6 +75,7 @@ def setup_handlers(web_app):
     heroku_handlers = [
         ("/heroku/logs", HerokuLogs),
         ("/heroku/create", HerokuCreate),
+        ("/heroku/destroy", HerokuDestroy),
         ("/heroku/apps", HerokuApps),
         ("/heroku/deploy", HerokuDeploy),
         ("/heroku/settings", HerokuSettings),

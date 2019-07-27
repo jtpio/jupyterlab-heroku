@@ -66,6 +66,13 @@ class Heroku:
         app = json.loads(res)
         return {"code": code, "app": app}
 
+    async def destroy(self, current_path, app):
+        cmd = ["heroku", "destroy", "--app", app, "--confirm", app]
+        code, res = await self._execute_command(current_path, cmd)
+        if code != 0:
+            return self._error(code, res)
+        return {"code": code}
+
     async def apps(self, current_path):
         all_remotes = await self._get_remotes(current_path)
         if not all_remotes:

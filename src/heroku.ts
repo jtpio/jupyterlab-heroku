@@ -8,6 +8,7 @@ import { ISignal } from "@phosphor/signaling";
 
 const LOGS_ENDPOINT = "/heroku/logs";
 const CREATE_ENDPOINT = "/heroku/create";
+const DESTROY_ENDPOINT = "/heroku/destroy";
 const APPS_ENDPOINT = "/heroku/apps";
 const DEPLOY_ENDPOINT = "/heroku/deploy";
 const GET_SETTINGS_ENDPOINT = "/heroku/settings";
@@ -96,6 +97,10 @@ export class Heroku {
 
   async create(): Promise<IHerokuAppCreateResponse> {
     return this.herokuAction<IHerokuAppCreateResponse>(CREATE_ENDPOINT);
+  }
+
+  async destroy(app: string): Promise<ReadonlyJSONObject> {
+    return this.herokuAction(DESTROY_ENDPOINT, "POST", { app });
   }
 
   async apps(): Promise<IHerokuApps> {
