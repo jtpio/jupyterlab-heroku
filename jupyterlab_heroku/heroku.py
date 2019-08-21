@@ -71,6 +71,11 @@ class Heroku:
         code, res = await self._execute_command(current_path, cmd)
         if code != 0:
             return self._error(code, res)
+
+        cmd = ["git", "remote", "remove", "heroku"]
+        # ignore error if the remote doesn't exist
+        _ = await self._execute_command(current_path, cmd)
+
         return {"code": code}
 
     async def apps(self, current_path):

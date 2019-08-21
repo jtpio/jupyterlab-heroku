@@ -8,7 +8,7 @@ import { TextArea } from "@blueprintjs/core/lib/cjs/components/forms/textArea";
 
 import * as React from "react";
 
-import { Heroku } from "./heroku";
+import { Heroku, IHerokuSettings } from "../heroku";
 
 const HEROKU_HEADER_CLASS = "jp-Heroku-header";
 const HEROKU_SETTINGS_REFRESH_ICON_CLASS = "jp-RefreshIcon";
@@ -26,14 +26,12 @@ const SETTINGS_UPDATE_LIMIT = 2000;
 
 interface IHerokuSettingsProps {
   heroku: Heroku;
+  enabled: boolean;
+  settings: IHerokuSettings;
+  refreshSettings: () => void;
 }
 
-interface IHerokuSettingsState {
-  enabled: boolean;
-  runtime: string;
-  dependencies: string;
-  procfile: string;
-}
+interface IHerokuSettingsState {}
 
 interface IHerokuSettingsRuntimeProps {
   setRuntime: (runtime: string) => void;
@@ -212,39 +210,7 @@ export class HerokuSettingsComponent extends React.Component<
 > {
   constructor(props: IHerokuSettingsProps) {
     super(props);
-    this.state = {
-      enabled: false,
-      runtime: "",
-      dependencies: "",
-      procfile: ""
-    };
-    this.props.heroku.pathChanged.connect(this.getSettings, this);
   }
-
-  componentDidMount = () => {
-    this.getSettings();
-  };
-
-  componentWillUnmount = () => {
-    this.props.heroku.pathChanged.disconnect(this.getSettings, this);
-  };
-
-  getSettings = async () => {
-    this.setState({ enabled: false });
-    const settings = await this.props.heroku.settings();
-    if (!settings) {
-      return this.setState({
-        enabled: false
-      });
-    }
-    const { runtime, dependencies, procfile } = settings;
-    this.setState({
-      enabled: true,
-      runtime,
-      dependencies,
-      procfile
-    });
-  };
 
   setProcfile = (procfile: string) => {
     this.props.heroku.updateSettings({ procfile });
@@ -259,6 +225,7 @@ export class HerokuSettingsComponent extends React.Component<
   };
 
   render() {
+    const { procfile, runtime, dependencies } = this.props.settings;
     return (
       <>
         <div className={HEROKU_HEADER_CLASS}>
@@ -266,21 +233,21 @@ export class HerokuSettingsComponent extends React.Component<
           <ToolbarButtonComponent
             tooltip="Refresh Settings"
             iconClassName={HEROKU_SETTINGS_REFRESH_ICON_CLASS}
-            onClick={this.getSettings}
+            onClick={this.props.refreshSettings}
           />
         </div>
-        {this.state.enabled && (
+        {this.props.enabled && (
           <div className={HEROKU_SETTINGS_LIST_CLASS}>
             <HerokuSettingsProcfileComponent
-              procfile={this.state.procfile}
+              procfile={procfile}
               setProcfile={this.setProcfile}
             />
             <HerokuSettingsRuntimeComponent
-              runtime={this.state.runtime}
+              runtime={runtime}
               setRuntime={this.setRuntime}
             />
             <HerokuSettingsDependenciesComponent
-              dependencies={this.state.dependencies}
+              dependencies={dependencies}
               setDependencies={this.setDependencies}
             />
           </div>
