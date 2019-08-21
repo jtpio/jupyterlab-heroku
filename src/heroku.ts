@@ -37,6 +37,12 @@ export interface IHerokuApp {
 
 export type IHerokuApps = IHerokuApp[];
 
+export interface IHerokuSettings {
+  runtime?: string;
+  dependencies?: string;
+  procfile?: string;
+}
+
 interface IHerokuAppCreateResponse {
   code: number;
   message?: string;
@@ -46,12 +52,6 @@ interface IHerokuAppCreateResponse {
 interface IHerokuAppsResponse {
   code: number;
   apps: IHerokuApps;
-}
-
-interface IHerokuSettings {
-  runtime?: string;
-  dependencies?: string;
-  procfile?: string;
 }
 
 interface IHerokuSettingsResponse {
