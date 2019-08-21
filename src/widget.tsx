@@ -1,35 +1,31 @@
-import { Toolbar, ReactWidget } from "@jupyterlab/apputils";
-
-import { Widget, PanelLayout } from "@phosphor/widgets";
+import { ReactWidget } from "@jupyterlab/apputils";
 
 import * as React from "react";
 
 import { Heroku } from "./heroku";
 
-import { HerokuAppsComponent } from "./apps";
-
-import { HerokuSettingsComponent } from "./settings";
+import { HerokuComponent } from "./components/heroku";
 
 const HEROKU_WIDGET_CLASS = "jp-Heroku";
 
-export class HerokuWidget extends Widget {
-  constructor(heroku: Heroku, runInTerminal: (cmd: string) => void) {
+export class HerokuWidget extends ReactWidget {
+  constructor(options: HerokuWidget.IOptions) {
     super();
+    this.options = options;
     this.addClass(HEROKU_WIDGET_CLASS);
-
-    let apps = ReactWidget.create(
-      <HerokuAppsComponent heroku={heroku} runInTerminal={runInTerminal} />
-    );
-    let settings = ReactWidget.create(
-      <HerokuSettingsComponent heroku={heroku} />
-    );
-
-    let layout = new PanelLayout();
-    layout.addWidget(apps);
-    layout.addWidget(settings);
-
-    this.layout = layout;
   }
 
-  readonly toolbar: Toolbar<Widget>;
+  render() {
+    const { heroku, runInTerminal } = this.options;
+    return <HerokuComponent heroku={heroku} runInTerminal={runInTerminal} />;
+  }
+
+  private options: HerokuWidget.IOptions;
+}
+
+export namespace HerokuWidget {
+  export interface IOptions {
+    heroku: Heroku;
+    runInTerminal: (cmd: string) => void;
+  }
 }

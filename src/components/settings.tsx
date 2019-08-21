@@ -8,7 +8,7 @@ import { TextArea } from "@blueprintjs/core/lib/cjs/components/forms/textArea";
 
 import * as React from "react";
 
-import { Heroku } from "./heroku";
+import { Heroku } from "../heroku";
 
 const HEROKU_HEADER_CLASS = "jp-Heroku-header";
 const HEROKU_SETTINGS_REFRESH_ICON_CLASS = "jp-RefreshIcon";

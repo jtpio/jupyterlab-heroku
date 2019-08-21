@@ -40,7 +40,7 @@ const extension: JupyterFrontEndPlugin<void> = {
       }
     };
 
-    let widget = new HerokuWidget(heroku, runInTerminal);
+    let widget = new HerokuWidget({ heroku, runInTerminal });
     widget.id = "jp-heroku";
     widget.title.iconClass = "jp-SideBar-tabIcon jp-HerokuIcon";
     widget.title.caption = "Heroku";
