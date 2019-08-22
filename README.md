@@ -109,3 +109,7 @@ jupyter lab --watch
 ```bash
 jupyter labextension uninstall jupyterlab-heroku
 ```
+
+## Alternatives
+
+To deploy Voila applications to Heroku using the command line: https://github.com/martinRenou/voila_heroku
