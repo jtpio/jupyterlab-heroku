@@ -5,8 +5,9 @@ import {
 
 import { IFileBrowserFactory } from "@jupyterlab/filebrowser";
 
-import { HerokuWidget } from "./widget";
-import { Heroku } from "./heroku";
+import { Model } from "./model";
+
+import { HerokuPanel } from "./panel";
 
 import "../style/index.css";
 
@@ -21,9 +22,8 @@ const extension: JupyterFrontEndPlugin<void> = {
   requires: [IFileBrowserFactory],
   activate: (app: JupyterFrontEnd, fileBrowserFactory: IFileBrowserFactory) => {
     const { commands } = app;
-    let heroku = new Heroku(fileBrowserFactory);
 
-    const runInTerminal = async (cmd: string) => {
+    const runInTerminal = async (cmd: string): Promise<void> => {
       const terminalWidget = await commands.execute("terminal:create-new");
       app.shell.add(terminalWidget, "main", { mode: "split-right" });
 
@@ -40,7 +40,9 @@ const extension: JupyterFrontEndPlugin<void> = {
       }
     };
 
-    let widget = new HerokuWidget({ heroku, runInTerminal });
+    const model = new Model({ fileBrowserFactory, runInTerminal });
+
+    let widget = new HerokuPanel({ model });
     widget.id = "jp-heroku";
     widget.title.iconClass = "jp-SideBar-tabIcon jp-HerokuIcon";
     widget.title.caption = "Heroku";

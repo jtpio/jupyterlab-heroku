@@ -1,8 +1,13 @@
-import { ToolbarButtonComponent } from "@jupyterlab/apputils";
+import {
+  ToolbarButtonComponent,
+  ReactWidget,
+  Dialog,
+  showDialog
+} from "@jupyterlab/apputils";
 
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 
-import { Heroku, IHerokuApp, IHerokuApps } from "../heroku";
+import { IHeroku } from "../tokens";
 
 const HEROKU_HEADER_CLASS = "jp-Heroku-header";
 const HEROKU_APP_LIST_CLASS = "jp-HerokuApp-sectionList";
@@ -15,196 +20,207 @@ const HEROKU_APP_DEPLOY_ICON_CLASS = "jp-FileUploadIcon";
 const HEROKU_APP_CREATE_ICON_CLASS = "jp-AddIcon";
 const HEROKU_APP_REFRESH_ICON_CLASS = "jp-RefreshIcon";
 
-interface IHerokuAppListProps {
-  apps: IHerokuApps;
-  deploy: () => Promise<boolean>;
-  destroy: (app: string) => void;
-  logs: (app: string) => void;
-}
+const App = ({ model, app }: { model: IHeroku.IModel; app: IHeroku.IApp }) => {
+  const [deploying, setDeploying] = useState(false);
+  const [error, setError] = useState(false);
 
-interface IHerokuAppProps {
-  app: IHerokuApp;
-  deploy: () => Promise<boolean>;
-  destroy: (app: string) => void;
-  logs: (app: string) => void;
-}
-
-interface IHerokuAppState {
-  deploying: boolean;
-  error: boolean;
-}
-
-interface IHerokuAppsProps {
-  heroku: Heroku;
-  apps: IHerokuApps;
-  createApp: () => void;
-  destroyApp: (app: string) => Promise<void>;
-  refreshApps: () => void;
-  runInTerminal: (cmd: string) => void;
-}
-
-interface IHerokuAppsState {
-  creating: boolean;
-}
-
-class Item extends React.Component<IHerokuAppProps, IHerokuAppState> {
-  constructor(props: IHerokuAppProps) {
-    super(props);
-    this.state = {
-      deploying: false,
-      error: false
-    };
-  }
-
-  destroy = async () => {
-    this.props.destroy(this.props.app.name);
+  const logs = async () => {
+    await model.logs(app.name);
   };
 
-  logs = async () => {
-    this.props.logs(this.props.app.name);
+  const deploy = async () => {
+    setError(false);
+    setDeploying(true);
+    try {
+      await model.deploy();
+    } catch (err) {
+      setError(true);
+    }
+    setDeploying(false);
   };
 
-  deploy = async () => {
-    this.setState({ deploying: true });
-    const success = await this.props.deploy();
-    this.setState({ deploying: false, error: !success });
+  const destroy = async () => {
+    let destroyButton = Dialog.warnButton({ label: "Destroy" });
+    const result = await showDialog({
+      title: "Destroy App?",
+      body: `Do you really want to destroy the app ${app.name}? This cannot be undone`,
+      buttons: [Dialog.cancelButton(), destroyButton]
+    });
+    if (result.button.accept) {
+      await model.destroy(app.name);
+      model.refreshApps();
+    }
   };
 
-  render() {
-    return (
-      <li className={HEROKU_APP_ITEM_CLASS}>
-        <span
-          className={`${HEROKU_APP_ITEM_ICON_CLASS} ${
-            this.state.error
-              ? HEROKU_APP_ITEM_ERROR_CLASS
-              : HEROKU_APP_ITEM_SUCCESS_CLASS
-          }`}
-        >
-          {this.state.deploying ? (
-            <i
-              title="Deploying"
-              className="fa fa-refresh fa-spin fa-lg fa-fw"
-            ></i>
-          ) : (
-            [
-              this.state.error && (
-                <i
-                  key="error"
-                  title="Error"
-                  className="fa fa-exclamation-circle fa-lg fa-fw"
-                ></i>
-              ),
-              !this.state.error && (
-                <i
-                  key="success"
-                  title="Deployed"
-                  className="fa fa-check-square fa-lg fa-fw"
-                ></i>
-              )
-            ]
-          )}
-        </span>
-        <span
-          className={HEROKU_APP_ITEM_LABEL_CLASS}
-          title={this.props.app.name}
-        >
-          {this.props.app.name}
-        </span>
-        <ToolbarButtonComponent
-          tooltip="Destroy App"
-          iconClassName="jp-CloseIcon"
-          onClick={this.destroy}
-        />
-        <ToolbarButtonComponent
-          tooltip="Show Logs"
-          iconClassName="jp-TextEditorIcon"
-          onClick={this.logs}
-        />
-        <ToolbarButtonComponent
-          tooltip="Open App"
-          iconClassName="jp-LauncherIcon"
-          onClick={() => {
-            window.open(this.props.app.web_url);
-          }}
-        />
-        <ToolbarButtonComponent
-          tooltip="Deploy App"
-          iconClassName={HEROKU_APP_DEPLOY_ICON_CLASS}
-          enabled={!this.state.deploying}
-          onClick={this.deploy}
-        />
-      </li>
-    );
-  }
-}
+  return (
+    <li className={HEROKU_APP_ITEM_CLASS}>
+      <span
+        className={`${HEROKU_APP_ITEM_ICON_CLASS} ${
+          error ? HEROKU_APP_ITEM_ERROR_CLASS : HEROKU_APP_ITEM_SUCCESS_CLASS
+        }`}
+      >
+        {deploying ? (
+          <i
+            title="Deploying"
+            className="fa fa-refresh fa-spin fa-lg fa-fw"
+          ></i>
+        ) : (
+          [
+            error && (
+              <i
+                key="error"
+                title="Error"
+                className="fa fa-exclamation-circle fa-lg fa-fw"
+              ></i>
+            ),
+            !error && (
+              <i
+                key="success"
+                title="Deployed"
+                className="fa fa-check-square fa-lg fa-fw"
+              ></i>
+            )
+          ]
+        )}
+      </span>
+      <span className={HEROKU_APP_ITEM_LABEL_CLASS} title={app.name}>
+        {app.name}
+      </span>
+      <ToolbarButtonComponent
+        tooltip="Destroy App"
+        iconClassName="jp-CloseIcon"
+        onClick={destroy}
+      />
+      <ToolbarButtonComponent
+        tooltip="Show Logs"
+        iconClassName="jp-TextEditorIcon"
+        onClick={logs}
+      />
+      <ToolbarButtonComponent
+        tooltip="Open App"
+        iconClassName="jp-LauncherIcon"
+        onClick={() => {
+          window.open(app.web_url);
+        }}
+      />
+      <ToolbarButtonComponent
+        tooltip="Deploy App"
+        iconClassName={HEROKU_APP_DEPLOY_ICON_CLASS}
+        enabled={!deploying}
+        onClick={deploy}
+      />
+    </li>
+  );
+};
 
-function ListView(props: IHerokuAppListProps) {
-  const { apps, ...rest } = props;
+const AppList = ({
+  model,
+  apps
+}: {
+  model: IHeroku.IModel;
+  apps: IHeroku.IApp[];
+}) => {
   return (
     <ul className={HEROKU_APP_LIST_CLASS}>
       {apps.map((props, i) => (
-        <Item key={i} app={props} {...rest} />
+        <App key={i} model={model} app={props} />
       ))}
     </ul>
   );
-}
+};
 
-export class HerokuAppsComponent extends React.Component<
-  IHerokuAppsProps,
-  IHerokuAppsState
-> {
-  constructor(props: IHerokuAppsProps) {
-    super(props);
-    this.state = {
-      creating: false
-    };
-  }
+const AppsComponent = ({ model }: { model: IHeroku.IModel }) => {
+  const [creating, setCreating] = useState(false);
+  const [apps, setApps] = useState([]);
 
-  viewAppLogs = async (app: string) => {
-    const path = this.props.heroku.currentPath;
-    const cmd = `cd ${path} && heroku logs -t -a ${app}`;
-    await this.props.runInTerminal(cmd);
-  };
-
-  create = async () => {
-    this.setState({ creating: true });
-    await this.props.createApp();
-    this.setState({ creating: false });
-  };
-
-  deploy = async () => {
-    const response = await this.props.heroku.deploy();
-    if (response.message) {
-      console.error(response.message);
-      return false;
-    }
-    return true;
-  };
-
-  render() {
-    return (
+  const showErrorDialog = () => {
+    let title = <span className="">Not a Git Repository</span>;
+    let body = (
       <>
-        <div className={HEROKU_HEADER_CLASS}>
-          <h2>Heroku apps</h2>
-          <ToolbarButtonComponent
-            enabled={!this.state.creating}
-            tooltip="Create New App"
-            iconClassName={HEROKU_APP_CREATE_ICON_CLASS}
-            onClick={this.create}
-          />
-          <ToolbarButtonComponent
-            tooltip="Refresh Apps"
-            iconClassName={HEROKU_APP_REFRESH_ICON_CLASS}
-            onClick={this.props.refreshApps}
-          />
-        </div>
-        <ListView
-          deploy={this.deploy}
-          destroy={this.props.destroyApp}
-          logs={this.viewAppLogs}
-          apps={...this.props.apps}
-        />
+        <p>
+          The current folder does not appear to be a Git repository. Heroku uses
+          Git to manage and create applications.
+        </p>
+        <p>
+          From the command line with `git init` or using the Git Extension for
+          JupyterLab.
+        </p>
       </>
     );
+    return showDialog({
+      title,
+      body,
+      buttons: [
+        Dialog.createButton({
+          label: "Dismiss",
+          className: "jp-About-button jp-mod-reject jp-mod-styled"
+        })
+      ]
+    });
+  };
+
+  const create = async () => {
+    setCreating(true);
+    try {
+      await model.createApp();
+    } catch (err) {
+      await showErrorDialog();
+    }
+    setCreating(false);
+  };
+
+  const refresh = async () => {
+    setApps([]);
+    await model.refreshApps();
+    setApps(model.apps);
+  };
+
+  useEffect(() => {
+    model.pathChanged.connect(refresh);
+    model.appsUpdated.connect(refresh);
+
+    return () => {
+      model.appsUpdated.disconnect(refresh);
+      model.pathChanged.disconnect(refresh);
+    };
+  }, []);
+
+  return (
+    <>
+      <div className={HEROKU_HEADER_CLASS}>
+        <h2>Heroku apps</h2>
+        <ToolbarButtonComponent
+          enabled={!creating}
+          tooltip="Create New App"
+          iconClassName={HEROKU_APP_CREATE_ICON_CLASS}
+          onClick={create}
+        />
+        <ToolbarButtonComponent
+          tooltip="Refresh Apps"
+          iconClassName={HEROKU_APP_REFRESH_ICON_CLASS}
+          onClick={refresh}
+        />
+      </div>
+      <AppList model={model} apps={apps} />
+    </>
+  );
+};
+
+export class Apps extends ReactWidget {
+  constructor(options: Apps.IOptions) {
+    super();
+    this._model = options.model;
+  }
+
+  render() {
+    return <AppsComponent model={this._model} />;
+  }
+
+  private _model: IHeroku.IModel;
+}
+
+export namespace Apps {
+  export interface IOptions {
+    model: IHeroku.IModel;
   }
 }

@@ -17,6 +17,11 @@
   font-size: var(--jp-ui-font-size1);
 }
 
+/* Heroku Split Handle */
+.jp-Heroku .p-SplitPanel-handle {
+  background-color: var(--jp-border-color2);
+}
+
 /* Heroku Section Header */
 .jp-Heroku-header {
   flex: 0 0 auto;

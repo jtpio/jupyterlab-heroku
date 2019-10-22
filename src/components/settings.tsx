@@ -1,4 +1,4 @@
-import { ToolbarButtonComponent } from "@jupyterlab/apputils";
+import { ToolbarButtonComponent, ReactWidget } from "@jupyterlab/apputils";
 
 import { Debouncer } from "@jupyterlab/coreutils";
 
@@ -6,9 +6,9 @@ import { HTMLSelect, InputGroup } from "@jupyterlab/ui-components";
 
 import { TextArea } from "@blueprintjs/core/lib/cjs/components/forms/textArea";
 
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 
-import { Heroku, IHerokuSettings } from "../heroku";
+import { IHeroku } from "../tokens";
 
 const HEROKU_HEADER_CLASS = "jp-Heroku-header";
 const HEROKU_SETTINGS_REFRESH_ICON_CLASS = "jp-RefreshIcon";
@@ -24,235 +24,197 @@ const DEFAULT_PROCFILE = "web: voila --port=$PORT --no-browser";
 // debounce settings updates
 const SETTINGS_UPDATE_LIMIT = 2000;
 
-interface IHerokuSettingsProps {
-  heroku: Heroku;
-  enabled: boolean;
-  settings: IHerokuSettings;
-  refreshSettings: () => void;
-}
+const Procfile = (props: { model: IHeroku.IModel; procfile?: string }) => {
+  const [procfile, setProcfile] = useState(DEFAULT_PROCFILE);
 
-interface IHerokuSettingsState {}
+  const { model } = props;
 
-interface IHerokuSettingsRuntimeProps {
-  setRuntime: (runtime: string) => void;
-  runtime?: string;
-}
+  const debouncer = new Debouncer(() => {
+    model.procfile = procfile;
+  }, SETTINGS_UPDATE_LIMIT);
 
-interface IHerokuSettingsRuntimeState {
-  runtime: string;
-}
+  useEffect(() => {
+    setProcfile(props.procfile || DEFAULT_PROCFILE);
+    debouncer.invoke();
 
-interface IHerokuSettingsDependenciesProps {
-  setDependencies: (dependencies: string) => void;
-  dependencies?: string;
-}
-
-interface IHerokuSettingsDependenciesState {
-  dependencies: string;
-}
-
-interface IHerokuSettingsProcfileProps {
-  setProcfile: (procfile: string) => void;
-  procfile?: string;
-}
-
-interface IHerokuSettingsProcfileState {
-  procfile: string;
-}
-
-class HerokuSettingsProcfileComponent extends React.Component<
-  IHerokuSettingsProcfileProps,
-  IHerokuSettingsProcfileState
-> {
-  constructor(props: IHerokuSettingsProcfileProps) {
-    super(props);
-    this._debouncer = new Debouncer(() => {
-      this.props.setProcfile(this.state.procfile);
-    }, SETTINGS_UPDATE_LIMIT);
-    this.state = {
-      procfile: props.procfile || DEFAULT_PROCFILE
+    return () => {
+      debouncer.dispose();
     };
-    if (!props.procfile) {
-      this._debouncer.invoke();
-    }
-  }
+  }, [props]);
 
-  componentWillUnmount = () => {
-    this._debouncer.dispose();
+  useEffect(() => {
+    debouncer.invoke();
+  }, [procfile]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.currentTarget.value;
+    setProcfile(value);
   };
 
-  handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const procfile = event.currentTarget.value;
-    this.setState({
-      procfile
-    });
-    this._debouncer.invoke();
-  };
+  return (
+    <>
+      <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Procfile">
+        <h4>Procfile</h4>
+      </div>
+      <InputGroup
+        className={HEROKU_SETTINGS_INPUT_CLASS}
+        onChange={handleChange}
+        placeholder="Command to execute"
+        value={procfile}
+        aria-label="Procfile"
+      />
+    </>
+  );
+};
 
-  render() {
-    return (
-      <>
-        <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Procfile">
-          <h4>Procfile</h4>
-        </div>
-        <InputGroup
-          className={HEROKU_SETTINGS_INPUT_CLASS}
-          onChange={this.handleChange}
-          placeholder="Command to execute"
-          value={this.state.procfile}
-          aria-label="Procfile"
-        />
-      </>
-    );
-  }
+const Runtime = (props: { model: IHeroku.IModel; runtime: string }) => {
+  const [runtime, setRuntime] = useState(RUNTIMES[0]);
 
-  private _debouncer: Debouncer;
-}
+  const { model } = props;
 
-class HerokuSettingsRuntimeComponent extends React.Component<
-  IHerokuSettingsRuntimeProps,
-  IHerokuSettingsRuntimeState
-> {
-  constructor(props: IHerokuSettingsRuntimeProps) {
-    super(props);
-    this.state = {
-      runtime: props.runtime || RUNTIMES[0]
-    };
-    if (!props.runtime) {
-      this.props.setRuntime(this.state.runtime);
-    }
-  }
+  useEffect(() => {
+    setRuntime(props.runtime || RUNTIMES[0]);
+  }, [props]);
 
-  handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  useEffect(() => {
+    model.runtime = runtime;
+  }, [runtime]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const runtime = event.currentTarget.value;
-    this.setState({
-      runtime
-    });
-    this.props.setRuntime(runtime);
+    setRuntime(runtime);
   };
 
-  render() {
-    return (
-      <>
-        <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Runtime">
-          <h4>Runtime</h4>
-        </div>
-        <HTMLSelect
-          className={HEROKU_SETTINGS_SELECT_CLASS}
-          onChange={this.handleChange}
-          value={this.state.runtime}
-          iconProps={{
-            icon: (
-              <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon bp3-fill" />
-            )
-          }}
-          aria-label="Runtime"
-        >
-          {RUNTIMES.map((runtime, i) => (
-            <option key={i} value={runtime}>
-              {runtime}
-            </option>
-          ))}
-        </HTMLSelect>
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Runtime">
+        <h4>Runtime</h4>
+      </div>
+      <HTMLSelect
+        className={HEROKU_SETTINGS_SELECT_CLASS}
+        onChange={handleChange}
+        value={runtime}
+        iconProps={{
+          icon: (
+            <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon bp3-fill" />
+          )
+        }}
+        aria-label="Runtime"
+      >
+        {RUNTIMES.map((runtime, i) => (
+          <option key={i} value={runtime}>
+            {runtime}
+          </option>
+        ))}
+      </HTMLSelect>
+    </>
+  );
+};
 
-class HerokuSettingsDependenciesComponent extends React.Component<
-  IHerokuSettingsDependenciesProps,
-  IHerokuSettingsDependenciesState
-> {
-  constructor(props: IHerokuSettingsDependenciesProps) {
-    super(props);
-    this.state = {
-      dependencies: props.dependencies
+const Dependencies = (props: {
+  model: IHeroku.IModel;
+  dependencies: string;
+}) => {
+  const [dependencies, setDependencies] = useState("");
+
+  const { model } = props;
+
+  const debouncer = new Debouncer(() => {
+    model.dependencies = dependencies;
+  }, SETTINGS_UPDATE_LIMIT);
+
+  useEffect(() => {
+    setDependencies(props.dependencies || "");
+
+    return () => {
+      debouncer.dispose();
     };
-    this._debouncer = new Debouncer(() => {
-      this.props.setDependencies(this.state.dependencies);
-    }, SETTINGS_UPDATE_LIMIT);
-  }
+  }, [props]);
 
-  componentWillUnmount = () => {
-    this._debouncer.dispose();
-  };
+  useEffect(() => {
+    debouncer.invoke();
+  }, [dependencies]);
 
-  handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const dependencies = event.currentTarget.value;
-    this.setState({
-      dependencies
-    });
-    this._debouncer.invoke();
+    setDependencies(dependencies);
   };
+
+  return (
+    <>
+      <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Dependencies">
+        <h4>Dependencies</h4>
+      </div>
+      <TextArea
+        className={HEROKU_SETTINGS_TEXTAREA_CLASS}
+        value={dependencies}
+        onChange={handleChange}
+        aria-label="Dependencies"
+      />
+    </>
+  );
+};
+
+const SettingsList = (props: { model: IHeroku.IModel }) => {
+  const { model } = props;
+  const [enabled, setEnabled] = useState(false);
+  const [settings, setSettings] = useState({} as IHeroku.ISettings);
+
+  const refresh = async () => {
+    const hasSettings = await model.refreshSettings();
+    setEnabled(hasSettings);
+    setSettings(model.settings);
+  };
+
+  useEffect(() => {
+    refresh();
+
+    model.pathChanged.connect(refresh);
+    model.appsUpdated.connect(refresh);
+
+    return () => {
+      model.appsUpdated.disconnect(refresh);
+      model.pathChanged.disconnect(refresh);
+    };
+  }, []);
+
+  return (
+    <>
+      <div className={HEROKU_HEADER_CLASS}>
+        <h2>Settings</h2>
+        <ToolbarButtonComponent
+          tooltip="Refresh Settings"
+          iconClassName={HEROKU_SETTINGS_REFRESH_ICON_CLASS}
+          onClick={refresh}
+        />
+      </div>
+      {enabled && (
+        <div className={HEROKU_SETTINGS_LIST_CLASS}>
+          <Procfile procfile={settings.procfile} model={model} />
+          <Runtime runtime={settings.runtime} model={model} />
+          <Dependencies dependencies={settings.dependencies} model={model} />
+        </div>
+      )}
+    </>
+  );
+};
+
+export class Settings extends ReactWidget {
+  constructor(options: Settings.IOptions) {
+    super();
+    this._model = options.model;
+    void this._model.refreshSettings();
+  }
 
   render() {
-    return (
-      <>
-        <div className={HEROKU_SETTINGS_TITLE_CLASS} title="Dependencies">
-          <h4>Dependencies</h4>
-        </div>
-        <TextArea
-          className={`${HEROKU_SETTINGS_TEXTAREA_CLASS}`}
-          value={this.state.dependencies}
-          onChange={this.handleChange}
-          aria-label="Dependencies"
-        />
-      </>
-    );
+    return <SettingsList model={this._model} />;
   }
 
-  private _debouncer: Debouncer;
+  private _model: IHeroku.IModel;
 }
 
-export class HerokuSettingsComponent extends React.Component<
-  IHerokuSettingsProps,
-  IHerokuSettingsState
-> {
-  constructor(props: IHerokuSettingsProps) {
-    super(props);
-  }
-
-  setProcfile = (procfile: string) => {
-    this.props.heroku.updateSettings({ procfile });
-  };
-
-  setRuntime = (runtime: string) => {
-    this.props.heroku.updateSettings({ runtime });
-  };
-
-  setDependencies = (dependencies: string) => {
-    this.props.heroku.updateSettings({ dependencies });
-  };
-
-  render() {
-    const { procfile, runtime, dependencies } = this.props.settings;
-    return (
-      <>
-        <div className={HEROKU_HEADER_CLASS}>
-          <h2>Settings</h2>
-          <ToolbarButtonComponent
-            tooltip="Refresh Settings"
-            iconClassName={HEROKU_SETTINGS_REFRESH_ICON_CLASS}
-            onClick={this.props.refreshSettings}
-          />
-        </div>
-        {this.props.enabled && (
-          <div className={HEROKU_SETTINGS_LIST_CLASS}>
-            <HerokuSettingsProcfileComponent
-              procfile={procfile}
-              setProcfile={this.setProcfile}
-            />
-            <HerokuSettingsRuntimeComponent
-              runtime={runtime}
-              setRuntime={this.setRuntime}
-            />
-            <HerokuSettingsDependenciesComponent
-              dependencies={dependencies}
-              setDependencies={this.setDependencies}
-            />
-          </div>
-        )}
-      </>
-    );
+export namespace Settings {
+  export interface IOptions {
+    model: IHeroku.IModel;
   }
 }
