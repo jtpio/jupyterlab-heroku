@@ -24,18 +24,13 @@ export namespace IHeroku {
   }
 
   export interface IClient {
+    status(): Promise<IStatusResponse>;
     logs(): Promise<ReadonlyJSONObject>;
-
     create(): Promise<ICreateResponse>;
-
     destroy(request: IDestroyRequest): Promise<IDestroyResponse>;
-
     apps(): Promise<IAppsResponse>;
-
     deploy(): Promise<IDeployResponse>;
-
     updateSettings(request: ISettingsRequest): Promise<void>;
-
     settings(): Promise<ISettingsResponse>;
 
     path: string;
@@ -53,6 +48,10 @@ export namespace IHeroku {
     procfile?: string;
   }
 
+  export interface IStatus {
+    git?: string;
+  }
+
   // requests
 
   export interface IDestroyRequest {
@@ -64,6 +63,12 @@ export namespace IHeroku {
   }
 
   // responses
+
+  export interface IStatusResponse {
+    code: number;
+    message?: string;
+    status?: IStatus;
+  }
 
   export interface ICreateResponse {
     code: number;

@@ -6,6 +6,7 @@ import { ReadonlyJSONObject } from "@phosphor/coreutils";
 
 import { IHeroku } from "./tokens";
 
+const STATUS_ENDPOINT = "/heroku/status";
 const LOGS_ENDPOINT = "/heroku/logs";
 const CREATE_ENDPOINT = "/heroku/create";
 const DESTROY_ENDPOINT = "/heroku/destroy";
@@ -52,6 +53,10 @@ export class Client implements IHeroku.IClient {
 
   async logs(): Promise<ReadonlyJSONObject> {
     return this.herokuAction(LOGS_ENDPOINT);
+  }
+
+  async status(): Promise<IHeroku.IStatusResponse> {
+    return this.herokuAction(STATUS_ENDPOINT);
   }
 
   async create(): Promise<IHeroku.ICreateResponse> {

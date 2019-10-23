@@ -19,6 +19,12 @@ class HerokuHandler(APIHandler):
         return self.get_json_body()["current_path"]
 
 
+class HerokuStatus(HerokuHandler):
+    async def post(self):
+        result = await self.heroku.status(self.current_path)
+        self.finish(json.dumps(result))
+
+
 class HerokuLogs(HerokuHandler):
     async def post(self):
         result = await self.heroku.logs(self.current_path)
@@ -73,6 +79,7 @@ def setup_handlers(web_app):
     """
 
     heroku_handlers = [
+        ("/heroku/status", HerokuStatus),
         ("/heroku/logs", HerokuLogs),
         ("/heroku/create", HerokuCreate),
         ("/heroku/destroy", HerokuDestroy),

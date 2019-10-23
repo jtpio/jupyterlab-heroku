@@ -16,8 +16,9 @@ export class Model {
     this._client.path = this._fileBrowserFactory.defaultBrowser.model.path;
 
     this._fileBrowserFactory.defaultBrowser.model.pathChanged.connect(
-      (sender, path) => {
+      async (sender, path) => {
         this._client.path = path.newValue;
+        await this.refreshStatus();
         this.pathChanged.emit(void 0);
       }
     );
@@ -25,6 +26,7 @@ export class Model {
 
   apps: IHeroku.IApp[] = [];
   settings: IHeroku.ISettings = {};
+  status: IHeroku.IStatus | null = null;
 
   appsUpdated = new Signal<this, void>(this);
   pathChanged = new Signal<this, void>(this);
@@ -56,6 +58,16 @@ export class Model {
       return true;
     }
     return false;
+  }
+
+  async refreshStatus() {
+    const reply = await this._client.status();
+    // basic way to check if in a git repo
+    if (reply.code !== 0) {
+      this.status = null;
+      return;
+    }
+    this.status = reply.status;
   }
 
   async logs(app: string) {

@@ -3,6 +3,8 @@ import {
   JupyterFrontEndPlugin
 } from "@jupyterlab/application";
 
+import { ICommandPalette } from "@jupyterlab/apputils";
+
 import { IFileBrowserFactory } from "@jupyterlab/filebrowser";
 
 import { Model } from "./model";
@@ -13,6 +15,10 @@ import "../style/index.css";
 
 const EXTENSION_ID = "jupyterlab-heroku";
 
+export namespace CommandIDs {
+  export const create = "heroku:create";
+}
+
 /**
  * Initialization data for the jupyterlab-heroku extension.
  */
@@ -20,7 +26,12 @@ const extension: JupyterFrontEndPlugin<void> = {
   id: EXTENSION_ID,
   autoStart: true,
   requires: [IFileBrowserFactory],
-  activate: (app: JupyterFrontEnd, fileBrowserFactory: IFileBrowserFactory) => {
+  optional: [ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    fileBrowserFactory: IFileBrowserFactory,
+    palette: ICommandPalette
+  ) => {
     const { commands } = app;
 
     const runInTerminal = async (cmd: string): Promise<void> => {
@@ -41,6 +52,21 @@ const extension: JupyterFrontEndPlugin<void> = {
     };
 
     const model = new Model({ fileBrowserFactory, runInTerminal });
+
+    commands.addCommand(CommandIDs.create, {
+      label: "Create New App",
+      isEnabled: () => {
+        return !!model.status && !!model.status.git;
+      },
+      execute: async () => {
+        await model.createApp();
+      }
+    });
+
+    if (palette) {
+      const category = "Heroku";
+      palette.addItem({ command: CommandIDs.create, category });
+    }
 
     let widget = new HerokuPanel({ model });
     widget.id = "jp-heroku";
