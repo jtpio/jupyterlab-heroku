@@ -40,6 +40,15 @@ class Heroku:
             return []
         return res.splitlines()
 
+    async def status(self, current_path):
+        cmd = ["git", "status"]
+        code, res = await self._execute_command(current_path, cmd)
+        if code != 0:
+            return self._error(code, res)
+
+        git_status = res.splitlines()
+        return {"code": code, "status": { "git": git_status }}
+
     async def logs(self, current_path):
         cmd = ["heroku", "logs"]
         code, res = await self._execute_command(current_path, cmd)
