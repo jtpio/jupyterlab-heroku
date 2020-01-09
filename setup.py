@@ -19,4 +19,10 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=["jupyterlab"],
     package_data={"jupyterlab_heroku": ["*"]},
+    license="BSD 3-clause",
+    classifiers=[
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+    ],
+    url="https://github.com/jtpio/jupyterlab-heroku",
 )
