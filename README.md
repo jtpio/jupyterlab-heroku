@@ -49,8 +49,21 @@ This extension also requires:
 
 ## Install
 
+With `pip`:
+
 ```bash
 pip install jupyterlab-heroku
+```
+
+With `conda`:
+
+```bash
+conda install -c conda-forge jupyterlab_heroku
+```
+
+To enable the extensions:
+
+```bash
 jupyter serverextension enable --sys-prefix --py jupyterlab_heroku
 jupyter labextension install jupyterlab-heroku
 ```
@@ -58,7 +71,9 @@ jupyter labextension install jupyterlab-heroku
 Since Heroku uses `git` to deploy applications, it is also recommended to install the `jupyterlab-git` extension for JupyterLab:
 
 ```bash
-pip install jupyterlab-git
+conda install -c conda-forge jupyterlab-git
+# with pip: pip install jupyterlab-git
+
 jupyter serverextension enable --sys-prefix --py jupyterlab_git
 jupyter labextension install @jupyterlab/git
 ```
